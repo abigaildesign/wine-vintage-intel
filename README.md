@@ -100,7 +100,7 @@ To add a wildfire-prone region outside the US, set `wildfireProne: true` on it i
 
 ```
 wine-vintage-intel/
-├── terroir-intelligence.html          ← main page, structure
+├── index.html          ← main page, structure
 ├── styles.css          ← all styling
 ├── app.js              ← UI logic (cards, map, modal, report, auto-populate)
 └── data/
