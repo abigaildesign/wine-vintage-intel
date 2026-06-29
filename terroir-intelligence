@@ -1,0 +1,2944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terroir Intelligence — Vintage Climate Outlook</title>
+  <style>
+/* =========================================================
+   TERROIR INTELLIGENCE — STYLES
+   Design: Deep cellar palette, aged parchment accents,
+   Playfair Display serif + Inter sans. Signature element:
+   wine-glass gauge on region cards.
+   ========================================================= */
+
+:root {
+  --wine-deep:    #2D0A1A;
+  --wine-mid:     #6B1A33;
+  --wine-bright:  #9B2335;
+  --wine-blush:   #C4526A;
+  --parchment:    #F5EFE0;
+  --parchment-dk: #E8DFCA;
+  --slate:        #3A3A4A;
+  --slate-lt:     #6E6E82;
+  --cream:        #FAF7F2;
+  --gold:         #C9A84C;
+  --gold-lt:      #E8D48A;
+
+  --watch-green:  #2A6B3A;
+  --watch-lt:     #D6EFD8;
+  --concern-red:  #8B2020;
+  --concern-lt:   #F5D5D5;
+  --normal-blue:  #1A4A6B;
+  --normal-lt:    #D5E8F5;
+  --unknown-grey: #5A5A6A;
+  --unknown-lt:   #E8E8EE;
+
+  --radius: 8px;
+  --radius-lg: 14px;
+  --shadow: 0 2px 12px rgba(45,10,26,0.10);
+  --shadow-hover: 0 6px 24px rgba(45,10,26,0.18);
+
+  font-size: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--cream);
+  color: var(--slate);
+  min-height: 100vh;
+}
+
+/* ---- HEADER ---- */
+.site-header {
+  background: var(--wine-deep);
+  border-bottom: 3px solid var(--wine-mid);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logo-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.logo-icon { font-size: 1.75rem; }
+
+.logo-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--parchment);
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.logo-sub {
+  font-size: 0.65rem;
+  color: var(--gold-lt);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.header-nav {
+  display: flex;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: rgba(245,239,224,0.65);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.03em;
+}
+
+.nav-btn:hover { color: var(--parchment); background: rgba(255,255,255,0.08); }
+.nav-btn.active { color: var(--gold); background: rgba(201,168,76,0.15); }
+
+.season-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--gold);
+  color: var(--wine-deep);
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ---- MAIN ---- */
+.main-content { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* ---- DASHBOARD INTRO ---- */
+.dashboard-intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-intro h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--wine-deep);
+  line-height: 1.2;
+  margin-bottom: 0.4rem;
+}
+
+.dashboard-intro p { color: var(--slate-lt); font-size: 0.85rem; }
+
+.intro-actions { display: flex; gap: 0.75rem; flex-shrink: 0; }
+
+.btn-primary {
+  background: var(--wine-bright);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+  letter-spacing: 0.02em;
+}
+.btn-primary:hover { background: var(--wine-mid); }
+
+.btn-secondary {
+  background: white;
+  color: var(--wine-bright);
+  border: 1.5px solid var(--wine-bright);
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-secondary:hover { background: var(--parchment); }
+
+/* ---- TIER STRIP ---- */
+.tier-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tier-card {
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.tier-watch  { background: var(--watch-lt);   border-left: 4px solid var(--watch-green); }
+.tier-normal { background: var(--normal-lt);  border-left: 4px solid var(--normal-blue); }
+.tier-concern{ background: var(--concern-lt); border-left: 4px solid var(--concern-red); }
+.tier-unknown{ background: var(--unknown-lt); border-left: 4px solid var(--unknown-grey);}
+
+.tier-count {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.tier-watch  .tier-count { color: var(--watch-green); }
+.tier-normal .tier-count { color: var(--normal-blue); }
+.tier-concern .tier-count { color: var(--concern-red); }
+.tier-unknown .tier-count { color: var(--unknown-grey); }
+
+.tier-label { font-size: 0.82rem; color: var(--slate); line-height: 1.4; }
+.tier-label small { color: var(--slate-lt); }
+
+/* ---- FILTER BAR ---- */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  background: white;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-lt);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.filter-group select, .filter-search {
+  border: 1.5px solid var(--parchment-dk);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  color: var(--slate);
+  background: var(--cream);
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.18s;
+}
+
+.filter-group select:focus, .filter-search:focus {
+  border-color: var(--wine-bright);
+}
+
+.filter-search { flex: 1; min-width: 160px; }
+
+/* ---- REGION GRID ---- */
+.region-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.region-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.18s;
+  border-top: 4px solid transparent;
+}
+.region-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.region-card.tier-watch   { border-top-color: var(--watch-green); }
+.region-card.tier-normal  { border-top-color: var(--normal-blue); }
+.region-card.tier-concern { border-top-color: var(--concern-red); }
+.region-card.tier-unknown { border-top-color: var(--unknown-grey);}
+
+.card-header {
+  padding: 1rem 1.1rem 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card-region-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--wine-deep);
+  line-height: 1.3;
+}
+
+.card-country {
+  font-size: 0.7rem;
+  color: var(--slate-lt);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+/* THE GLASS GAUGE — signature element */
+.glass-gauge {
+  width: 44px;
+  height: 52px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.glass-gauge svg { width: 100%; height: 100%; }
+
+.card-body {
+  padding: 0 1.1rem 0.7rem;
+}
+
+.card-varieties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.variety-chip {
+  font-size: 0.67rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+  background: var(--parchment);
+  color: var(--wine-mid);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.card-outlook {
+  font-size: 0.8rem;
+  color: var(--slate);
+  line-height: 1.5;
+}
+
+.card-factors {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.factor-tag {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.factor-pos { background: var(--watch-lt);   color: var(--watch-green); }
+.factor-neg { background: var(--concern-lt); color: var(--concern-red); }
+.factor-neu { background: var(--unknown-lt); color: var(--unknown-grey);}
+
+.card-footer {
+  padding: 0.6rem 1.1rem;
+  border-top: 1px solid var(--parchment-dk);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tier-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+}
+
+.badge-watch   { background: var(--watch-lt);   color: var(--watch-green); }
+.badge-normal  { background: var(--normal-lt);  color: var(--normal-blue); }
+.badge-concern { background: var(--concern-lt); color: var(--concern-red); }
+.badge-unknown { background: var(--unknown-lt); color: var(--unknown-grey);}
+
+.score-display {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--slate);
+}
+
+.score-display small {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  color: var(--slate-lt);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+/* ---- MAP ---- */
+.map-header { margin-bottom: 1rem; }
+.map-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--wine-deep);
+  margin-bottom: 0.3rem;
+}
+.map-header p { font-size: 0.82rem; color: var(--slate-lt); margin-bottom: 0.75rem; }
+.map-header strong { color: var(--slate); }
+
+.map-legend {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.78rem;
+  color: var(--slate);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.dot-watch   { background: var(--watch-green); }
+.dot-normal  { background: var(--normal-blue); }
+.dot-concern { background: var(--concern-red); }
+.dot-unknown { background: var(--unknown-grey);}
+
+#region-map {
+  width: 100%;
+  height: 560px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* ---- REPORT ---- */
+.report-wrapper { max-width: 860px; }
+.report-controls { margin-bottom: 1.5rem; }
+.report-controls h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--wine-deep);
+  margin-bottom: 0.3rem;
+}
+.report-controls p { font-size: 0.82rem; color: var(--slate-lt); margin-bottom: 0.75rem; }
+.report-actions { display: flex; gap: 0.75rem; }
+
+.report-document {
+  background: white;
+  border: 1px solid var(--parchment-dk);
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  box-shadow: var(--shadow);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--slate);
+}
+
+.report-document h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--wine-deep);
+  border-bottom: 2px solid var(--wine-bright);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.report-document h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: var(--wine-mid);
+  margin: 1.75rem 0 0.75rem;
+}
+
+.report-document h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--slate);
+  margin: 1rem 0 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.report-document .report-meta {
+  font-size: 0.78rem;
+  color: var(--slate-lt);
+  margin-bottom: 1.5rem;
+}
+
+.report-region-entry {
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--parchment-dk);
+  margin-bottom: 0.65rem;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.report-region-entry.watch   { border-left-color: var(--watch-green);  background: rgba(42,107,58,0.04);  }
+.report-region-entry.normal  { border-left-color: var(--normal-blue);  background: rgba(26,74,107,0.04); }
+.report-region-entry.concern { border-left-color: var(--concern-red);  background: rgba(139,32,32,0.04); }
+
+/* ---- SETTINGS ---- */
+.settings-wrapper { max-width: 700px; }
+.settings-wrapper h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--wine-deep);
+  margin-bottom: 1.5rem;
+}
+
+.settings-section {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.settings-section h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--wine-mid);
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--parchment-dk);
+}
+
+.settings-section p { font-size: 0.82rem; color: var(--slate-lt); margin-bottom: 0.75rem; line-height: 1.6; }
+.settings-section label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--slate);
+  margin-bottom: 0.3rem;
+  margin-top: 0.75rem;
+}
+
+.settings-section input[type="text"] {
+  width: 100%;
+  border: 1.5px solid var(--parchment-dk);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--slate);
+  outline: none;
+}
+
+.settings-section input[type="text"]:focus { border-color: var(--wine-bright); }
+
+.settings-note { font-size: 0.75rem !important; color: var(--slate-lt) !important; font-style: italic; }
+
+.source-links { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+.source-links a {
+  color: var(--wine-bright);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.source-links a:hover { text-decoration: underline; }
+.source-links li::before { content: "→ "; color: var(--wine-blush); }
+
+code {
+  background: var(--parchment);
+  color: var(--wine-deep);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.82em;
+}
+
+/* ---- MODAL ---- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(45,10,26,0.55);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(45,10,26,0.35);
+  position: relative;
+}
+
+.modal-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: 1rem 1rem 0 0;
+  background: var(--parchment);
+  border: none;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--slate);
+  z-index: 10;
+}
+
+.modal-content { padding: 1.75rem 2rem 2rem; }
+
+.modal-content h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  color: var(--wine-deep);
+  margin-bottom: 0.25rem;
+}
+
+.modal-content .modal-sub {
+  font-size: 0.78rem;
+  color: var(--slate-lt);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.25rem;
+}
+
+.modal-section { margin-bottom: 1.1rem; }
+.modal-section h4 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--wine-mid);
+  margin-bottom: 0.45rem;
+}
+
+.modal-section p { font-size: 0.85rem; line-height: 1.65; color: var(--slate); }
+
+.climate-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.climate-stat {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.85rem;
+}
+
+.climate-stat .stat-label { font-size: 0.68rem; color: var(--slate-lt); text-transform: uppercase; letter-spacing: 0.06em; }
+.climate-stat .stat-value { font-size: 1rem; font-weight: 600; color: var(--slate); margin-top: 2px; }
+
+.modal-score-bar { margin: 1rem 0; }
+.score-bar-track {
+  background: var(--parchment-dk);
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.6s ease;
+}
+
+/* ---- AUTO-POPULATE UI ---- */
+.autopop-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  border-radius: var(--radius);
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.autopop-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--parchment-dk);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.autopop-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--wine-mid), var(--wine-bright));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.autopop-msg {
+  font-size: 0.8rem;
+  color: var(--slate-lt);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.autopop-notice {
+  background: var(--gold-lt);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 0.75rem 1.1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--wine-deep);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.9rem;
+  line-height: 1.5;
+}
+
+.autopop-warn { color: var(--concern-red); font-weight: 500; }
+
+.autopop-revert {
+  margin-left: auto;
+  background: var(--wine-deep);
+  color: var(--parchment);
+  border: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.autopop-revert:hover { background: var(--wine-mid); }
+
+.btn-primary:disabled { opacity: 0.6; cursor: wait; }
+
+/* per-card live indicator */
+.card-live-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--watch-green);
+  margin-right: 4px;
+  vertical-align: middle;
+  box-shadow: 0 0 0 2px rgba(42,107,58,0.2);
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 900px) {
+  .tier-strip { grid-template-columns: 1fr 1fr; }
+  .header-inner { flex-wrap: wrap; }
+  .main-content { padding: 1rem; }
+}
+
+@media (max-width: 600px) {
+  .tier-strip { grid-template-columns: 1fr 1fr; }
+  .region-grid { grid-template-columns: 1fr; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .report-document { padding: 1.5rem; }
+  .climate-grid { grid-template-columns: 1fr; }
+}
+
+@media print {
+  .site-header, .report-controls, .filter-bar, .tier-strip { display: none; }
+  .view { display: block !important; }
+  #view-dashboard, #view-map, #view-settings { display: none !important; }
+  #view-report { display: block !important; }
+  .report-document { box-shadow: none; border: none; }
+}
+
+</style>
+
+  <!-- Leaflet for maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo-block">
+        <span class="logo-icon">🍷</span>
+        <div>
+          <h1 class="logo-title">Terroir Intelligence</h1>
+          <p class="logo-sub">Vintage Climate Outlook</p>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+        <button class="nav-btn" data-view="map">Region Map</button>
+        <button class="nav-btn" data-view="report">Report</button>
+        <button class="nav-btn" data-view="settings">Settings</button>
+      </nav>
+      <div class="header-meta">
+        <span class="season-badge" id="season-badge">Loading season...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- VIEWS -->
+  <main class="main-content">
+
+    <!-- DASHBOARD VIEW -->
+    <section class="view active" id="view-dashboard">
+      <div class="dashboard-intro">
+        <div class="intro-text">
+          <h2>2025 Growing Season Outlook</h2>
+          <p>Cross-referenced climate data from NOAA, Copernicus, and ENSO forecasts against varietal climate thresholds. Last updated: <span id="last-updated">—</span></p>
+        </div>
+        <div class="intro-actions">
+          <button class="btn-primary" id="autopop-btn">⚡ Auto-Populate from Live Climate Data</button>
+          <button class="btn-secondary" id="export-btn">⬇ Export Report</button>
+        </div>
+      </div>
+
+      <!-- AUTO-POPULATE PROGRESS / STATUS -->
+      <div class="autopop-status" id="autopop-status" hidden>
+        <div class="autopop-bar-track"><div class="autopop-bar-fill" id="autopop-bar"></div></div>
+        <span class="autopop-msg" id="autopop-msg">Fetching live climate data…</span>
+      </div>
+      <div class="autopop-notice" id="autopop-notice" hidden>
+        <strong>Live data mode.</strong> Scores are auto-computed from Open-Meteo (NOAA/ECMWF/Météo-France/DWD/BOM models).
+        <span class="autopop-warn">⚠ Open-Meteo is free for non-commercial use only — for a paid product, see Settings → Licensing.</span>
+        <button class="autopop-revert" id="revert-btn">Revert to manual data</button>
+      </div>
+
+      <!-- TIER SUMMARY STRIP -->
+      <div class="tier-strip">
+        <div class="tier-card tier-watch">
+          <span class="tier-count" id="count-watch">—</span>
+          <span class="tier-label">Watch List<br><small>Exceptional conditions</small></span>
+        </div>
+        <div class="tier-card tier-normal">
+          <span class="tier-count" id="count-normal">—</span>
+          <span class="tier-label">Normal Season<br><small>On track</small></span>
+        </div>
+        <div class="tier-card tier-concern">
+          <span class="tier-count" id="count-concern">—</span>
+          <span class="tier-label">Concern List<br><small>Difficult conditions</small></span>
+        </div>
+        <div class="tier-card tier-unknown">
+          <span class="tier-count" id="count-unknown">—</span>
+          <span class="tier-label">Monitoring<br><small>Data pending</small></span>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>Filter by tier:</label>
+          <select id="filter-tier">
+            <option value="all">All Regions</option>
+            <option value="watch">Watch List</option>
+            <option value="normal">Normal</option>
+            <option value="concern">Concern</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Filter by country:</label>
+          <select id="filter-country">
+            <option value="all">All Countries</option>
+            <option value="France">France</option>
+            <option value="Italy">Italy</option>
+            <option value="Spain">Spain</option>
+            <option value="USA">USA</option>
+            <option value="Australia">Australia</option>
+            <option value="Argentina">Argentina</option>
+            <option value="Germany">Germany</option>
+            <option value="Portugal">Portugal</option>
+            <option value="New Zealand">New Zealand</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Grape variety:</label>
+          <select id="filter-variety">
+            <option value="all">All Varieties</option>
+            <option value="Pinot Noir">Pinot Noir</option>
+            <option value="Cabernet Sauvignon">Cabernet Sauvignon</option>
+            <option value="Chardonnay">Chardonnay</option>
+            <option value="Syrah/Shiraz">Syrah/Shiraz</option>
+            <option value="Riesling">Riesling</option>
+            <option value="Nebbiolo">Nebbiolo</option>
+            <option value="Tempranillo">Tempranillo</option>
+            <option value="Grenache">Grenache</option>
+          </select>
+        </div>
+        <input class="filter-search" id="filter-search" type="text" placeholder="Search region..." />
+      </div>
+
+      <!-- REGION CARDS GRID -->
+      <div class="region-grid" id="region-grid">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- MAP VIEW -->
+    <section class="view" id="view-map">
+      <div class="map-header">
+        <h2>Wine Region Map</h2>
+        <p>Click any marker to see the full region outlook. GeoJSON appellation overlays can be added in <strong>Settings → Load GeoJSON</strong>.</p>
+        <div class="map-legend">
+          <span class="legend-dot dot-watch"></span> Exceptional
+          <span class="legend-dot dot-normal"></span> Normal
+          <span class="legend-dot dot-concern"></span> Concern
+          <span class="legend-dot dot-unknown"></span> Monitoring
+        </div>
+      </div>
+      <div id="region-map"></div>
+    </section>
+
+    <!-- REPORT VIEW -->
+    <section class="view" id="view-report">
+      <div class="report-wrapper">
+        <div class="report-controls">
+          <h2>Vintage Outlook Report</h2>
+          <p>A formatted report ready to copy, share, or export. Customize your branding in Settings.</p>
+          <div class="report-actions">
+            <button class="btn-primary" id="copy-report-btn">Copy as Text</button>
+            <button class="btn-secondary" id="print-report-btn">Print / Save PDF</button>
+          </div>
+        </div>
+        <div class="report-document" id="report-document">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS VIEW -->
+    <section class="view" id="view-settings">
+      <div class="settings-wrapper">
+        <h2>Settings & Data Sources</h2>
+
+        <div class="settings-section">
+          <h3>Live Data & Licensing ⚠</h3>
+          <p>Auto-population uses <a href="https://open-meteo.com" target="_blank">Open-Meteo</a>, which aggregates NOAA, ECMWF, Météo-France, DWD, BOM, JMA and other national weather services. It needs no API key and runs entirely in your browser.</p>
+          <input type="text" id="setting-gdd-base" value="50" />
+          <p class="settings-note">Standard viticultural base is 50°F. Change only if you have a region-specific reason.</p>
+        </div>
+
+        <div class="settings-section">
+          <h3>Branding</h3>
+          <label>Report Title</label>
+          <input type="text" id="setting-report-title" value="Terroir Intelligence — Vintage Outlook" />
+          <label>Author / Publication Name</label>
+          <input type="text" id="setting-author" value="" placeholder="Your name or newsletter" />
+          <label>Tagline</label>
+          <input type="text" id="setting-tagline" value="" placeholder="e.g. Independent wine climate analysis" />
+        </div>
+
+        <div class="settings-section">
+          <h3>Load GeoJSON Appellation Map</h3>
+          <p>Drop in a GeoJSON file of wine regions to render appellation boundaries on the map. Free sources: <a href="https://github.com/nvkelso/natural-earth-vector" target="_blank">Natural Earth</a>, <a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap/Overpass</a>, or community wine region repos.</p>
+          <input type="file" id="geojson-upload" accept=".geojson,.json" />
+          <p class="settings-note" id="geojson-status">No GeoJSON loaded. Map shows point markers only.</p>
+        </div>
+
+        <div class="settings-section">
+          <h3>Data Sources</h3>
+          <p>This tool uses publicly available seasonal forecast data. Links open in new tabs for manual review.</p>
+          <ul class="source-links">
+            <li><a href="https://www.cpc.ncep.noaa.gov/products/predictions/90day/" target="_blank">NOAA 3-Month Outlook (CPC)</a></li>
+            <li><a href="https://climate.copernicus.eu/seasonal-forecasts" target="_blank">Copernicus Seasonal Forecasts (EU)</a></li>
+            <li><a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/" target="_blank">NOAA ENSO Advisory</a></li>
+            <li><a href="https://www.bom.gov.au/climate/enso/" target="_blank">Australian BOM ENSO Outlook</a></li>
+            <li><a href="https://www.wunderground.com/history" target="_blank">Weather Underground Historical</a></li>
+          </ul>
+        </div>
+
+
+    </section>
+
+  </main>
+
+  <!-- MODAL: Region Detail -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="region-modal">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div class="modal-content" id="modal-content">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  
+  
+  
+  
+<script>
+// ============================================================
+// TERROIR INTELLIGENCE — REGION DATA
+// ============================================================
+// HOW TO ADD A REGION:
+// Copy the template below, fill in all fields, add to REGIONS array.
+//
+// score: 0–100 overall vintage quality outlook
+//   90–100 = Exceptional / Watch List
+//   65–89  = Normal / On Track
+//   40–64  = Concern / Below Average
+//   0–39   = Significant Concern
+//
+// tier: "watch" | "normal" | "concern" | "unknown"
+//
+// climateFactors: array of { label, type: "pos"|"neg"|"neu" }
+//
+// lat/lng: center of the appellation for map marker
+//
+// dataSource: what informed this outlook (for transparency)
+// ============================================================
+
+const REGIONS = [
+
+  // ——— FRANCE ———
+  {
+    id: "bordeaux",
+    name: "Bordeaux",
+    country: "France",
+    subregion: "Gironde",
+    lat: 44.84, lng: -0.58,
+    varieties: ["Cabernet Sauvignon", "Merlot", "Cabernet Franc", "Sauvignon Blanc"],
+    score: 60,
+    tier: "normal",
+    outlook: "A largely balanced growing season. Mild winter rains restored water tables without excess; spring was slightly warm, advancing bud break by ~1 week vs. average. Watch for late-August conditions as harvest nears — current forecasts suggest a warm, dry finish which would be favorable for Cabernet Sauvignon ripening.",
+    climateFactors: [
+      { label: "Winter rainfall adequate", type: "pos" },
+      { label: "Spring temps above avg", type: "pos" },
+      { label: "Late-season forecast uncertain", type: "neu" },
+      { label: "Minor frost event (Mar)", type: "neg" }
+    ],
+    gdd: { current: 1640, average: 1580, unit: "°F GDD" },
+    rainfall: { ytd: "92%", harvest_risk: "Low" },
+    dataSource: "Copernicus C3S, Météo-France seasonal forecast Q2 2025"
+  },
+
+  {
+    id: "burgundy",
+    name: "Burgundy (Côte d'Or)",
+    country: "France",
+    subregion: "Bourgogne",
+    lat: 47.05, lng: 4.85,
+    varieties: ["Pinot Noir", "Chardonnay"],
+    score: 65,
+    tier: "watch",
+    outlook: "Shaping up as a potentially exceptional vintage, particularly for Pinot Noir. Growing degree day accumulation is running ~8% above the 10-year average, with well-distributed rainfall through spring. Cool nights during veraison are preserving acid structure — exactly the conditions that produce the best Burgundy. Reminiscent of conditions in 2015 and 2019.",
+    climateFactors: [
+      { label: "GDD +8% above average", type: "pos" },
+      { label: "Cool nights preserving acidity", type: "pos" },
+      { label: "Excellent spring soil moisture", type: "pos" },
+      { label: "Hailstorm risk (Jul) — localized", type: "neg" }
+    ],
+    gdd: { current: 1820, average: 1680, unit: "°F GDD" },
+    rainfall: { ytd: "108%", harvest_risk: "Low" },
+    dataSource: "BIVB, Copernicus C3S, Météo-France"
+  },
+
+  {
+    id: "champagne",
+    name: "Champagne",
+    country: "France",
+    subregion: "Grand Est",
+    lat: 49.25, lng: 3.93,
+    varieties: ["Chardonnay", "Pinot Noir", "Pinot Meunier"],
+    score: 52,
+    tier: "normal",
+    outlook: "Adequate but unremarkable season so far. Slightly wetter than average spring has increased mildew pressure, requiring additional canopy management. Growing season temperatures are on track but not exceptional. Non-vintage blends will perform well; vintage declarations will depend heavily on harvest weather.",
+    climateFactors: [
+      { label: "Temps on track", type: "pos" },
+      { label: "Above-avg spring rainfall", type: "neg" },
+      { label: "Mildew pressure elevated", type: "neg" },
+      { label: "Summer drying trend", type: "pos" }
+    ],
+    gdd: { current: 1290, average: 1270, unit: "°F GDD" },
+    rainfall: { ytd: "118%", harvest_risk: "Medium" },
+    dataSource: "CIVC, Météo-France"
+  },
+
+  {
+    id: "rhone-north",
+    name: "Northern Rhône",
+    country: "France",
+    subregion: "Auvergne-Rhône-Alpes",
+    lat: 45.18, lng: 4.83,
+    varieties: ["Syrah/Shiraz", "Viognier", "Roussanne"],
+    score: 63,
+    tier: "normal",
+    outlook: "Exceptional conditions for Syrah. Heat accumulation has been significant without crossing into extreme territory, with the Rhône corridor experiencing ideal diurnal swings. Condrieu (Viognier) and Hermitage blanc look particularly promising based on early berry development reports. One to watch closely.",
+    climateFactors: [
+      { label: "Ideal diurnal temperature range", type: "pos" },
+      { label: "GDD well above average", type: "pos" },
+      { label: "Low disease pressure", type: "pos" },
+      { label: "Minor drought stress (Jun)", type: "neu" }
+    ],
+    gdd: { current: 1950, average: 1790, unit: "°F GDD" },
+    rainfall: { ytd: "78%", harvest_risk: "Low" },
+    dataSource: "Inter Rhône, Copernicus C3S"
+  },
+
+  {
+    id: "alsace",
+    name: "Alsace",
+    country: "France",
+    subregion: "Grand Est",
+    lat: 48.32, lng: 7.44,
+    varieties: ["Riesling", "Gewurztraminer", "Pinot Gris"],
+    score: 58,
+    tier: "normal",
+    outlook: "Solid year in progress for Alsace. The rain shadow effect has kept the region drier than neighboring areas. Riesling is showing excellent early flavor development. Slight concern around potential late-season rain that could dilute aromatics in Gewurztraminer.",
+    climateFactors: [
+      { label: "Favorable rain shadow conditions", type: "pos" },
+      { label: "Good Riesling development", type: "pos" },
+      { label: "Late-season rain risk", type: "neg" }
+    ],
+    gdd: { current: 1560, average: 1510, unit: "°F GDD" },
+    rainfall: { ytd: "82%", harvest_risk: "Low-Medium" },
+    dataSource: "CIVA, Météo-France"
+  },
+
+  // ——— ITALY ———
+  {
+    id: "barolo",
+    name: "Barolo / Barbaresco (Piedmont)",
+    country: "Italy",
+    subregion: "Piemonte",
+    lat: 44.61, lng: 7.93,
+    varieties: ["Nebbiolo"],
+    score: 66,
+    tier: "watch",
+    outlook: "Potentially the vintage of the decade for Nebbiolo. A perfect combination of warm days, cool nights, and timely rains have produced the conditions Nebbiolo thrives in. Sugar accumulation is on track for excellent ripeness while retaining the naturally high acidity that defines great Barolo. Producers are excited — this could rival the legendary 2010 and 2016.",
+    climateFactors: [
+      { label: "Perfect diurnal range for Nebbiolo", type: "pos" },
+      { label: "Excellent acid retention", type: "pos" },
+      { label: "Sugar accumulation on target", type: "pos" },
+      { label: "Low disease pressure", type: "pos" }
+    ],
+    gdd: { current: 2050, average: 1880, unit: "°F GDD" },
+    rainfall: { ytd: "95%", harvest_risk: "Very Low" },
+    dataSource: "Consorzio Barolo Barbaresco, ARPA Piemonte"
+  },
+
+  {
+    id: "tuscany",
+    name: "Chianti / Brunello (Tuscany)",
+    country: "Italy",
+    subregion: "Toscana",
+    lat: 43.47, lng: 11.03,
+    varieties: ["Sangiovese"],
+    score: 54,
+    tier: "normal",
+    outlook: "A good but not exceptional year for Sangiovese in Tuscany. Warm, dry summer has produced concentrated flavors but water stress in some sub-zones warrants monitoring. Brunello di Montalcino, with its higher elevation sites, is tracking better than Chianti Classico lowland areas.",
+    climateFactors: [
+      { label: "Good flavor concentration", type: "pos" },
+      { label: "Drought stress in some zones", type: "neg" },
+      { label: "Montalcino elevation advantage", type: "pos" }
+    ],
+    gdd: { current: 2210, average: 2050, unit: "°F GDD" },
+    rainfall: { ytd: "68%", harvest_risk: "Low-Medium" },
+    dataSource: "Consorzio Vino Chianti Classico, ARPA Toscana"
+  },
+
+  // ——— SPAIN ———
+  {
+    id: "rioja",
+    name: "Rioja",
+    country: "Spain",
+    subregion: "La Rioja / Álava / Navarra",
+    lat: 42.47, lng: -2.44,
+    varieties: ["Tempranillo", "Garnacha", "Graciano", "Viura"],
+    score: 57,
+    tier: "normal",
+    outlook: "Rioja is having a steady, warm year. Tempranillo is developing well across Rioja Alta and Rioja Alavesa. The Mediterranean-influenced Rioja Baja may see some heat stress on Garnacha, but traditional subzones look solid. Worth following as harvest approaches in late September.",
+    climateFactors: [
+      { label: "Strong Tempranillo development", type: "pos" },
+      { label: "Rioja Baja heat stress concern", type: "neg" },
+      { label: "Above-avg summer temps", type: "neu" }
+    ],
+    gdd: { current: 2380, average: 2240, unit: "°F GDD" },
+    rainfall: { ytd: "72%", harvest_risk: "Low" },
+    dataSource: "CRDO Rioja, AEMET"
+  },
+
+  // ——— USA ———
+  {
+    id: "napa",
+    name: "Napa Valley",
+    country: "USA",
+    subregion: "California",
+    lat: 38.50, lng: -122.27,
+    varieties: ["Cabernet Sauvignon", "Merlot", "Chardonnay", "Sauvignon Blanc"],
+    score: 61,
+    tier: "normal",
+    outlook: "Following a very wet 2024 that replenished reservoirs, 2025 is shaping up as a textbook warm California vintage. The La Niña transition has brought drier, warmer conditions. Cabernet Sauvignon in Oakville and Rutherford is tracking superbly. Look for excellent mountain-grown Cabernet (Howell Mountain, Spring Mountain) given the drainage those sites provide in wet years.",
+    climateFactors: [
+      { label: "Post-La Niña ideal conditions", type: "pos" },
+      { label: "Excellent water table from 2024", type: "pos" },
+      { label: "Warm, dry ripening window", type: "pos" },
+      { label: "Wildfire smoke risk (Aug–Oct)", type: "neg" }
+    ],
+    gdd: { current: 3140, average: 2980, unit: "°F GDD" },
+    rainfall: { ytd: "95%", harvest_risk: "Low-Medium" },
+    dataSource: "NOAA CPC, Napa Valley Vintners, Wine Institute CA"
+  },
+
+  {
+    id: "willamette",
+    name: "Willamette Valley",
+    country: "USA",
+    subregion: "Oregon",
+    lat: 45.21, lng: -123.09,
+    varieties: ["Pinot Noir", "Chardonnay", "Pinot Gris"],
+    score: 50,
+    tier: "normal",
+    outlook: "A challenging spring with late frosts and excess moisture has put Willamette Valley behind. However, dry summer conditions are helping recovery. Producers who managed canopy aggressively will likely produce excellent Pinot Noir. The best wines will come from Dundee Hills and Chehalem Mountains AVAs where drainage is superior. Quantity may be below average but quality is salvageable.",
+    climateFactors: [
+      { label: "Strong summer recovery", type: "pos" },
+      { label: "Late spring frost damage", type: "neg" },
+      { label: "Excess moisture — disease pressure", type: "neg" },
+      { label: "Excellent Dundee Hills drainage", type: "pos" }
+    ],
+    gdd: { current: 1720, average: 1790, unit: "°F GDD" },
+    rainfall: { ytd: "125%", harvest_risk: "Medium" },
+    dataSource: "NOAA CPC, Oregon Wine Board, OSU Extension"
+  },
+
+  {
+    id: "sonoma",
+    name: "Sonoma County",
+    country: "USA",
+    subregion: "California",
+    lat: 38.53, lng: -122.81,
+    varieties: ["Pinot Noir", "Chardonnay", "Cabernet Sauvignon", "Zinfandel"],
+    score: 63,
+    tier: "normal",
+    outlook: "Sonoma is having an outstanding year across multiple variety types. Coastal fog patterns have been close to ideal — moderate morning marine layer burning off early, producing extended warm afternoons without excessive heat. Russian River Valley Pinot Noir and Chardonnay look particularly exciting. Sonoma Coast may produce some of its finest Pinot in a decade.",
+    climateFactors: [
+      { label: "Ideal coastal fog patterns", type: "pos" },
+      { label: "Extended warm afternoons", type: "pos" },
+      { label: "Russian River performing exceptionally", type: "pos" },
+      { label: "Wildfire risk monitoring ongoing", type: "neg" }
+    ],
+    gdd: { current: 2890, average: 2720, unit: "°F GDD" },
+    rainfall: { ytd: "98%", harvest_risk: "Low" },
+    dataSource: "NOAA CPC, Sonoma County Vintners"
+  },
+
+  // ——— AUSTRALIA ———
+  {
+    id: "barossa",
+    name: "Barossa Valley",
+    country: "Australia",
+    subregion: "South Australia",
+    lat: -34.53, lng: 138.95,
+    varieties: ["Syrah/Shiraz", "Grenache", "Mourvèdre", "Riesling"],
+    score: 46,
+    tier: "normal",
+    outlook: "A difficult year for Barossa, with an exceptionally hot and dry summer (Southern Hemisphere vintage 2025 = early 2025 harvest). The old-vine Shiraz that Barossa is famous for shows remarkable drought resilience but yields are down significantly. Wines will be concentrated and likely high alcohol — powerful but not necessarily balanced. Eden Valley Riesling fared better due to elevation.",
+    climateFactors: [
+      { label: "Old-vine drought resilience", type: "pos" },
+      { label: "Very high summer temps", type: "neg" },
+      { label: "Significantly reduced yields", type: "neg" },
+      { label: "Eden Valley Riesling performs better", type: "pos" }
+    ],
+    gdd: { current: 4210, average: 3980, unit: "°F GDD" },
+    rainfall: { ytd: "58%", harvest_risk: "Low (already harvested)" },
+    dataSource: "BOM Australia, Wine Australia, ENSO 2024 impact data"
+  },
+
+  {
+    id: "mornington",
+    name: "Mornington Peninsula",
+    country: "Australia",
+    subregion: "Victoria",
+    lat: -38.38, lng: 144.97,
+    varieties: ["Pinot Noir", "Chardonnay"],
+    score: 60,
+    tier: "normal",
+    outlook: "Mornington Peninsula had a more favorable 2025 vintage (harvested early 2025) than many Australian regions. The maritime influence moderated summer extremes. Pinot Noir quality looks strong; small-production Chardonnay from sites like Red Hill looks exceptional. A region to watch for quality in this vintage year.",
+    climateFactors: [
+      { label: "Maritime moderation of heat", type: "pos" },
+      { label: "Strong Pinot Noir quality", type: "pos" },
+      { label: "Excellent Chardonnay sites", type: "pos" }
+    ],
+    gdd: { current: 2680, average: 2590, unit: "°F GDD" },
+    rainfall: { ytd: "88%", harvest_risk: "Low" },
+    dataSource: "BOM Australia, Wine Victoria"
+  },
+
+  // ——— ARGENTINA ———
+  {
+    id: "mendoza",
+    name: "Mendoza (Luján de Cuyo / Valle de Uco)",
+    country: "Argentina",
+    subregion: "Cuyo",
+    lat: -33.00, lng: -68.83,
+    varieties: ["Malbec", "Cabernet Sauvignon", "Torrontés"],
+    score: 59,
+    tier: "normal",
+    outlook: "Mendoza Malbec continues its streak of strong vintages. High-altitude Uco Valley sites (Gualtallary, Altamira) are producing particularly vibrant fruit — cool nights at 3,000m+ elevation preserving freshness that lower-altitude sites lack. A reliable year for classic Mendoza Malbec with no major climatic disruptions.",
+    climateFactors: [
+      { label: "High-altitude sites excelling", type: "pos" },
+      { label: "Good acid retention at elevation", type: "pos" },
+      { label: "No major hail events", type: "pos" }
+    ],
+    gdd: { current: 3290, average: 3180, unit: "°F GDD" },
+    rainfall: { ytd: "81%", harvest_risk: "Low" },
+    dataSource: "SMN Argentina, Wines of Argentina"
+  },
+
+  // ——— GERMANY ———
+  {
+    id: "mosel",
+    name: "Mosel",
+    country: "Germany",
+    subregion: "Rheinland-Pfalz",
+    lat: 50.00, lng: 7.10,
+    varieties: ["Riesling"],
+    score: 62,
+    tier: "normal",
+    outlook: "The Mosel is having an outstanding year for Riesling. Warm summer temperatures are building ripeness that in cool years like the Mosel never fully materializes, while the river's moderating influence and steep slate slopes have prevented the excess that plagues warmer regions. TBA/Auslese conditions are possible for late pickers. This could be a defining year for German Riesling.",
+    climateFactors: [
+      { label: "Exceptional warmth for ripeness", type: "pos" },
+      { label: "Slate heat retention ideal", type: "pos" },
+      { label: "River moderates extremes", type: "pos" },
+      { label: "TBA harvest potential", type: "pos" }
+    ],
+    gdd: { current: 1580, average: 1420, unit: "°F GDD" },
+    rainfall: { ytd: "86%", harvest_risk: "Low" },
+    dataSource: "DWD Germany, VDP, Copernicus"
+  },
+
+  // ——— NEW ZEALAND ———
+  {
+    id: "marlborough",
+    name: "Marlborough",
+    country: "New Zealand",
+    subregion: "South Island",
+    lat: -41.51, lng: 173.96,
+    varieties: ["Sauvignon Blanc", "Pinot Noir", "Chardonnay"],
+    score: 57,
+    tier: "normal",
+    outlook: "Marlborough Sauvignon Blanc (harvested early 2025) benefited from a long, cool ripening season. Aromatic intensity is reportedly high, with textbook passionfruit and gooseberry character. Pinot Noir from the Southern Valleys looks promising. Crop size close to average after previous lean year.",
+    climateFactors: [
+      { label: "Long cool ripening — high aromatics", type: "pos" },
+      { label: "Good Sauvignon Blanc conditions", type: "pos" },
+      { label: "Average crop size — supply normalizing", type: "neu" }
+    ],
+    gdd: { current: 1890, average: 1870, unit: "°F GDD" },
+    rainfall: { ytd: "94%", harvest_risk: "Low" },
+    dataSource: "NIWA New Zealand, NZ Winegrowers"
+  },
+
+  // ——— PORTUGAL ———
+  {
+    id: "douro",
+    name: "Douro Valley (Port & Douro DOC)",
+    country: "Portugal",
+    subregion: "Norte",
+    lat: 41.16, lng: -7.79,
+    varieties: ["Touriga Nacional", "Touriga Franca", "Tinta Roriz", "Tinta Barroca"],
+    score: 51,
+    tier: "normal",
+    outlook: "The Douro is managing a challenging year. Summer heat was extreme even by Douro standards, stressing the vines. Yields are down but the schist soils' natural resilience and the indigenous varieties' heat adaptation have helped. Vintage Port declaration is uncertain — likely a non-declared year for most houses. Quality table wines from high-elevation quintas could be excellent.",
+    climateFactors: [
+      { label: "Indigenous variety heat adaptation", type: "pos" },
+      { label: "Extreme summer temperatures", type: "neg" },
+      { label: "Reduced yields", type: "neg" },
+      { label: "High-elevation quintas outperforming", type: "pos" }
+    ],
+    gdd: { current: 4480, average: 4120, unit: "°F GDD" },
+    rainfall: { ytd: "54%", harvest_risk: "Low" },
+    dataSource: "IVDP, IPMA Portugal, Copernicus"
+  }
+
+];
+
+// Make available globally
+window.REGIONS = REGIONS;
+
+</script>
+<script>
+// ============================================================
+// TERROIR INTELLIGENCE — VARIETY CLIMATE THRESHOLDS
+// ============================================================
+// Reference data for cross-referencing weather against what
+// each major grape variety needs to thrive.
+//
+// Used in: report generation, modal detail view
+// ============================================================
+
+const VARIETIES = {
+  "Pinot Noir": {
+    idealGDD: { min: 1500, max: 2200, unit: "°F" },
+    harvestRainSensitivity: "Very High",
+    heatTolerance: "Low",
+    coldHardiness: "Medium",
+    droughtTolerance: "Low",
+    idealProfile: "Cool nights (45–55°F), warm days (75–85°F), low humidity at harvest. Highly site-specific.",
+    keyRisks: ["Harvest rain (botrytis)", "Heat spikes during veraison", "Spring frost"],
+    notesForReport: "Pinot Noir is the most climate-sensitive noble variety. Small changes in conditions produce outsized effects on quality. Favor single-vineyard / non-blend wines in excellent years."
+  },
+  "Cabernet Sauvignon": {
+    idealGDD: { min: 2500, max: 3500, unit: "°F" },
+    harvestRainSensitivity: "Medium",
+    heatTolerance: "High",
+    coldHardiness: "Low",
+    droughtTolerance: "High",
+    idealProfile: "Long warm growing season, dry harvest. Thick skins provide disease resistance.",
+    keyRisks: ["Frost at bud break", "Excessive heat (over 95°F for extended periods)", "Early rain at harvest"],
+    notesForReport: "Cabernet Sauvignon is more forgiving of hot, dry conditions than most varieties. Great years produce wines with structure for long aging."
+  },
+  "Chardonnay": {
+    idealGDD: { min: 1400, max: 2400, unit: "°F" },
+    harvestRainSensitivity: "High",
+    heatTolerance: "Medium",
+    coldHardiness: "Medium",
+    droughtTolerance: "Medium",
+    idealProfile: "Moderate temperatures with cool nights. Early budding makes it frost-susceptible.",
+    keyRisks: ["Spring frost (buds early)", "Harvest rain (mold)", "Excessive heat (loses acidity)"],
+    notesForReport: "Chardonnay is versatile but highly expressive of terroir and vintage conditions. Unoaked styles particularly sensitive to year-to-year variation."
+  },
+  "Syrah/Shiraz": {
+    idealGDD: { min: 2200, max: 3200, unit: "°F" },
+    harvestRainSensitivity: "Medium",
+    heatTolerance: "High",
+    coldHardiness: "Low",
+    droughtTolerance: "High",
+    idealProfile: "Warm, sunny conditions. Expresses differently in cool (Northern Rhône: spicy, savory) vs. warm (Barossa: ripe, powerful) climates.",
+    keyRisks: ["Excessive heat bleaches aromatics", "Early harvest rain"],
+    notesForReport: "The Syrah/Shiraz duality: same grape, radically different expression based on climate. Track Northern Rhône separately from Australian Shiraz."
+  },
+  "Riesling": {
+    idealGDD: { min: 1100, max: 1800, unit: "°F" },
+    harvestRainSensitivity: "Low",
+    heatTolerance: "Low",
+    coldHardiness: "Very High",
+    droughtTolerance: "Medium",
+    idealProfile: "Cool continental climate. Long, slow ripening. Late harvests for Spätlese/Auslese. Performs best on mineral soils (slate, volcanic).",
+    keyRisks: ["Excessive heat (loses acidity rapidly)", "Early season frost"],
+    notesForReport: "Riesling is warming-climate sensitive — even slight heat excess fundamentally alters the wine's character. Germany and Alsace are climate change bellwethers."
+  },
+  "Nebbiolo": {
+    idealGDD: { min: 1800, max: 2400, unit: "°F" },
+    harvestRainSensitivity: "High",
+    heatTolerance: "Medium",
+    coldHardiness: "Medium",
+    droughtTolerance: "Medium",
+    idealProfile: "Warm days, cool nights, specific to Piedmont's Langhe hills. Late-ripening — needs warm autumns.",
+    keyRisks: ["October harvest rain (catastrophic)", "Early autumn cold", "Drought stress"],
+    notesForReport: "Nebbiolo is the most location-specific major variety — it barely succeeds outside Piedmont. Vintage quality swings are extreme; great years vs. poor years are dramatically different."
+  },
+  "Tempranillo": {
+    idealGDD: { min: 2000, max: 3000, unit: "°F" },
+    harvestRainSensitivity: "Medium",
+    heatTolerance: "High",
+    coldHardiness: "Medium",
+    droughtTolerance: "High",
+    idealProfile: "Continental climate with extreme seasonal swings. Thrives on high-altitude meseta plateaus.",
+    keyRisks: ["Spring frost at high altitudes", "Extreme summer heat in low areas"],
+    notesForReport: "Tempranillo / Tinta Roriz / Aragonez — same variety, many names. Rioja, Ribera del Duero, and Douro require separate tracking."
+  },
+  "Grenache": {
+    idealGDD: { min: 2500, max: 3800, unit: "°F" },
+    harvestRainSensitivity: "Low",
+    heatTolerance: "Very High",
+    coldHardiness: "Low",
+    droughtTolerance: "Very High",
+    idealProfile: "Hot, dry, windy conditions. The definitive heat-adapted variety. Southern Rhône, GSM blends, Priorat.",
+    keyRisks: ["Coulure (flower drop) in wet springs", "Oxidation if not picked correctly"],
+    notesForReport: "Grenache may actually benefit from warming climate conditions that stress other varieties. Worth tracking in years when other southern French/Spanish varieties struggle."
+  },
+  "Malbec": {
+    idealGDD: { min: 2200, max: 3400, unit: "°F" },
+    harvestRainSensitivity: "High",
+    heatTolerance: "High",
+    coldHardiness: "Low",
+    droughtTolerance: "High",
+    idealProfile: "High altitude (1,000–3,000m) with intense UV, warm days, cold nights. Mendoza-specific optimal expression.",
+    keyRisks: ["Hail (major Mendoza risk)", "Harvest rain"],
+    notesForReport: "Malbec's dramatic improvement in altitude is well-documented — track Uco Valley (Gualtallary, Altamira) vs. lower Luján de Cuyo separately."
+  },
+  "Sauvignon Blanc": {
+    idealGDD: { min: 1200, max: 1900, unit: "°F" },
+    harvestRainSensitivity: "High",
+    heatTolerance: "Low",
+    coldHardiness: "Medium",
+    droughtTolerance: "Low",
+    idealProfile: "Cool maritime or continental. Long slow ripening builds aromatic intensity. Loire, Marlborough archetypes.",
+    keyRisks: ["Heat (flattens aromatics instantly)", "Harvest rain", "Overripe quickly"],
+    notesForReport: "Sauvignon Blanc aromatics are extremely vintage-sensitive. Cool, long ripening seasons produce extraordinary aromatic wines; warm years produce thin, alcoholic ones."
+  }
+};
+
+window.VARIETIES = VARIETIES;
+
+</script>
+<script>
+// ============================================================
+// TERROIR INTELLIGENCE — LIVE WEATHER ENGINE
+// ============================================================
+// Auto-populates region climate data from Open-Meteo.
+// No API key. CORS-enabled. Runs fully in the browser.
+//
+// Data source: Open-Meteo (aggregates NOAA, ECMWF, Météo-France,
+// DWD, BOM, JMA, and other national weather services).
+//
+// ⚠ LICENSING: Open-Meteo is FREE FOR NON-COMMERCIAL USE under
+// CC BY 4.0. For any PAID product (paid newsletter, B2B reports,
+// white-label), you must use Open-Meteo's commercial plan OR
+// self-host their open-source server. See:
+//   https://open-meteo.com/en/pricing
+//   https://github.com/open-meteo/open-meteo  (self-host, AGPL)
+// Attribution required either way: "Weather data by Open-Meteo.com"
+// ============================================================
+
+const WEATHER = (function () {
+  "use strict";
+
+  const ARCHIVE_HOST  = "https://archive-api.open-meteo.com/v1/archive";
+  const FORECAST_HOST = "https://api.open-meteo.com/v1/forecast";
+  const SEASONAL_HOST = "https://seasonal-api.open-meteo.com/v1/seasonal";
+
+  const BASE_TEMP_F = 50;          // GDD base temperature (°F) — standard for viticulture
+  const HISTORY_YEARS = 10;        // years of archive used for the baseline
+  const CACHE = {};                // in-memory cache: region.id -> {data, ts}
+  const CACHE_TTL = 1000 * 60 * 60 * 6; // 6 hours
+
+  // ----------------------------------------------------------
+  // GROWING SEASON WINDOWS
+  // Northern hemisphere: Apr 1 – Oct 31 (months 4–10)
+  // Southern hemisphere: Oct 1 – Apr 30 (wraps the year)
+  // ----------------------------------------------------------
+  function isSouthern(lat) { return lat < 0; }
+
+  function seasonWindow(lat, refDate) {
+    const d = refDate || new Date();
+    const year = d.getFullYear();
+    if (isSouthern(lat)) {
+      // Season started Oct 1 of previous (or current) year, ends Apr 30
+      const month = d.getMonth(); // 0-based
+      // If we're Jan–Apr, season started Oct 1 prior year.
+      // If we're Oct–Dec, season started Oct 1 this year.
+      const startYear = (month <= 3) ? year - 1 : year;
+      return {
+        start: new Date(startYear, 9, 1),       // Oct 1
+        seasonEnd: new Date(startYear + 1, 3, 30), // Apr 30
+        hemisphere: "Southern",
+        harvestMonths: [2, 3, 4]                 // Mar–May harvest (S. hem)
+      };
+    }
+    return {
+      start: new Date(year, 3, 1),              // Apr 1
+      seasonEnd: new Date(year, 9, 31),         // Oct 31
+      hemisphere: "Northern",
+      harvestMonths: [8, 9, 10]                  // Sep–Nov harvest (N. hem)
+    };
+  }
+
+  function fmtDate(d) {
+    return d.toISOString().slice(0, 10);
+  }
+
+  // ----------------------------------------------------------
+  // GDD COMPUTATION (Fahrenheit base 50)
+  // For each day: max(0, (Tmax+Tmin)/2 - 50), summed.
+  // ----------------------------------------------------------
+  function computeGDD(tmaxArr, tminArr) {
+    let sum = 0;
+    for (let i = 0; i < tmaxArr.length; i++) {
+      const tmax = tmaxArr[i], tmin = tminArr[i];
+      if (tmax == null || tmin == null) continue;
+      const mean = (tmax + tmin) / 2;
+      const gdd = Math.max(0, mean - BASE_TEMP_F);
+      sum += gdd;
+    }
+    return Math.round(sum);
+  }
+
+  function sumPrecip(arr) {
+    let s = 0;
+    for (const v of arr) { if (v != null) s += v; }
+    return Math.round(s * 100) / 100;
+  }
+
+  // ----------------------------------------------------------
+  // FETCH HELPERS
+  // ----------------------------------------------------------
+  async function fetchJSON(url) {
+    const res = await fetch(url);
+    if (!res.ok) {
+      let reason = res.statusText;
+      try { const j = await res.json(); if (j.reason) reason = j.reason; } catch (e) {}
+      throw new Error(`Open-Meteo ${res.status}: ${reason}`);
+    }
+    return res.json();
+  }
+
+  // Filter a daily timeseries to a season window (by month-of-year),
+  // grouped by season-year, returning accumulated GDD & precip per year.
+  function accumulateBySeasonYear(times, tmax, tmin, precip, lat, uptoToday) {
+    const southern = isSouthern(lat);
+    const today = new Date();
+    const byYear = {}; // seasonYearKey -> {gdd, precip, days}
+
+    for (let i = 0; i < times.length; i++) {
+      const dt = new Date(times[i] + "T00:00");
+      const m = dt.getMonth();   // 0-based
+      const y = dt.getFullYear();
+
+      // Is this date within a growing season, and which season-year does it belong to?
+      let inSeason, seasonKey;
+      if (southern) {
+        // Season = Oct(y) .. Apr(y+1). Months 9,10,11 -> seasonKey y ; months 0,1,2,3 -> seasonKey y-1
+        if (m >= 9) { inSeason = true; seasonKey = y; }
+        else if (m <= 3) { inSeason = true; seasonKey = y - 1; }
+        else inSeason = false;
+      } else {
+        // Season = Apr..Oct of same year. Months 3..9 (Apr..Oct=3..9? Oct=9). Include up to Oct 31 => month 9.
+        if (m >= 3 && m <= 9) { inSeason = true; seasonKey = y; }
+        else inSeason = false;
+      }
+      if (!inSeason) continue;
+
+      // For the CURRENT season we only accumulate up to "today" (to-date comparison).
+      if (uptoToday && dt > today) continue;
+
+      if (!byYear[seasonKey]) byYear[seasonKey] = { gdd: 0, precip: 0, days: 0 };
+      const tx = tmax[i], tn = tmin[i], pr = precip[i];
+      if (tx != null && tn != null) {
+        byYear[seasonKey].gdd += Math.max(0, (tx + tn) / 2 - BASE_TEMP_F);
+      }
+      if (pr != null) byYear[seasonKey].precip += pr;
+      byYear[seasonKey].days += 1;
+    }
+    return byYear;
+  }
+
+  // ----------------------------------------------------------
+  // MAIN: fetch + compute climate for one region
+  // ----------------------------------------------------------
+  async function fetchRegionClimate(region, opts) {
+    opts = opts || {};
+    // cache
+    const cached = CACHE[region.id];
+    if (cached && (Date.now() - cached.ts) < CACHE_TTL && !opts.force) {
+      return cached.data;
+    }
+
+    const win = seasonWindow(region.lat);
+    const today = new Date();
+    const histStart = new Date(win.start);
+    histStart.setFullYear(histStart.getFullYear() - HISTORY_YEARS);
+
+    // --- Archive call: historical + current season to-date ---
+    const archiveUrl = `${ARCHIVE_HOST}?latitude=${region.lat}&longitude=${region.lng}` +
+      `&start_date=${fmtDate(histStart)}&end_date=${fmtDate(today)}` +
+      `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum` +
+      `&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`;
+
+    // --- Forecast call: recent actuals + 16-day forecast (harvest rain risk) ---
+    const forecastUrl = `${FORECAST_HOST}?latitude=${region.lat}&longitude=${region.lng}` +
+      `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum` +
+      `&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto` +
+      `&past_days=14&forecast_days=16`;
+
+    const [archive, forecast] = await Promise.all([
+      fetchJSON(archiveUrl),
+      fetchJSON(forecastUrl)
+    ]);
+
+    // Accumulate per season-year from archive
+    const ad = archive.daily;
+    const byYear = accumulateBySeasonYear(
+      ad.time, ad.temperature_2m_max, ad.temperature_2m_min, ad.precipitation_sum,
+      region.lat, false
+    );
+
+    // Current season key
+    const currentSeasonKey = (function () {
+      const m = today.getMonth();
+      const y = today.getFullYear();
+      if (isSouthern(region.lat)) return (m <= 3) ? y - 1 : y;
+      return y;
+    })();
+
+    // Current season-to-date (only up to today)
+    const currentByYear = accumulateBySeasonYear(
+      ad.time, ad.temperature_2m_max, ad.temperature_2m_min, ad.precipitation_sum,
+      region.lat, true
+    );
+    const current = currentByYear[currentSeasonKey] || { gdd: 0, precip: 0, days: 0 };
+
+    // Historical average to the SAME day-of-season:
+    // Approximate by averaging completed past seasons' accumulation truncated
+    // to the same number of days. Simpler robust approach: average past years'
+    // accumulation over the same elapsed day count.
+    const elapsedDays = current.days || 1;
+    const pastKeys = Object.keys(byYear)
+      .map(Number)
+      .filter(k => k !== currentSeasonKey)
+      .sort();
+
+    // Recompute past-year accumulation truncated to elapsedDays for fair comparison
+    const histTrunc = pastYearsTruncated(ad, region.lat, currentSeasonKey, elapsedDays);
+    const gddAvg = avg(histTrunc.map(h => h.gdd));
+    const precipAvg = avg(histTrunc.map(h => h.precip));
+
+    // Harvest rain risk from forecast (is harvest near? how much rain forecast?)
+    const harvest = assessHarvestRain(forecast.daily, region.lat, win);
+
+    // Phenological stage metrics — GDD-based (self-adjusts to warmth & variety)
+    const stages = computeStagesGDD(currentSeasonDaily(ad, region.lat), region);
+
+    // Wildfire smoke exposure (US/wildfire-prone regions; air-quality archive ~2022+)
+    const smoke = await fetchSmokeExposure(region);
+
+    const data = {
+      gddCurrent: Math.round(current.gdd),
+      gddAvg: Math.round(gddAvg) || 1,
+      precipCurrent: round2(current.precip),
+      precipAvg: round2(precipAvg) || 0.01,
+      elapsedDays,
+      hemisphere: win.hemisphere,
+      harvestRainRisk: harvest.risk,
+      harvestRainForecast: harvest.totalInches,
+      harvestNear: harvest.near,
+      stages: stages,
+      smoke: smoke,
+      yearsOfHistory: histTrunc.length,
+      fetchedAt: new Date().toISOString(),
+      attribution: "Weather data by Open-Meteo.com"
+    };
+
+    CACHE[region.id] = { data, ts: Date.now() };
+    return data;
+  }
+
+  // Recompute each past season's accumulation truncated to N elapsed days
+  function pastYearsTruncated(ad, lat, currentSeasonKey, elapsedDays) {
+    const southern = isSouthern(lat);
+    // Group day indices by season-year in chronological order
+    const groups = {};
+    for (let i = 0; i < ad.time.length; i++) {
+      const dt = new Date(ad.time[i] + "T00:00");
+      const m = dt.getMonth(), y = dt.getFullYear();
+      let inSeason, key;
+      if (southern) {
+        if (m >= 9) { inSeason = true; key = y; }
+        else if (m <= 3) { inSeason = true; key = y - 1; }
+        else inSeason = false;
+      } else {
+        if (m >= 3 && m <= 9) { inSeason = true; key = y; }
+        else inSeason = false;
+      }
+      if (!inSeason || key === currentSeasonKey) continue;
+      (groups[key] = groups[key] || []).push(i);
+    }
+    const out = [];
+    Object.keys(groups).forEach(key => {
+      const idxs = groups[key].slice(0, elapsedDays); // truncate to same elapsed length
+      let gdd = 0, precip = 0;
+      idxs.forEach(i => {
+        const tx = ad.temperature_2m_max[i], tn = ad.temperature_2m_min[i], pr = ad.precipitation_sum[i];
+        if (tx != null && tn != null) gdd += Math.max(0, (tx + tn) / 2 - BASE_TEMP_F);
+        if (pr != null) precip += pr;
+      });
+      // Only include reasonably complete past seasons
+      if (idxs.length >= Math.min(elapsedDays, 20)) out.push({ gdd, precip, days: idxs.length });
+    });
+    return out;
+  }
+
+  function assessHarvestRain(daily, lat, win) {
+    // Look at the 16-day forecast window; sum precipitation.
+    const total = sumPrecip(daily.precipitation_sum || []);
+    // Are we within ~6 weeks of harvest?
+    const today = new Date();
+    const m = today.getMonth();
+    const near = win.harvestMonths.includes(m) ||
+                 win.harvestMonths.includes((m + 1) % 12);
+    let risk;
+    if (!near) {
+      risk = total > 2.0 ? "Medium (not harvest)" : "Low (not harvest)";
+    } else {
+      if (total > 2.5) risk = "High";
+      else if (total > 1.0) risk = "Medium";
+      else risk = "Low";
+    }
+    return { risk, totalInches: total, near };
+  }
+
+  // ==========================================================
+  // WILDFIRE SMOKE EXPOSURE (US / wildfire-prone regions)
+  // PM2.5 during the ripening→harvest window is a smoke-taint proxy.
+  // Note: Open-Meteo's air-quality archive only reaches ~2022, so this
+  // is a live/recent-season factor. Historical smoke vintages are handled
+  // via manual flags in the back-tester.
+  // ==========================================================
+  const AQ_HOST = "https://air-quality-api.open-meteo.com/v1/air-quality";
+
+  // Red grapes suffer smoke taint more than whites (skin maceration extracts
+  // smoke-derived volatile phenols; whites are pressed off skins quickly).
+  const RED_GRAPES = new Set([
+    "Cabernet Sauvignon","Merlot","Cabernet Franc","Pinot Noir","Syrah/Shiraz",
+    "Nebbiolo","Tempranillo","Grenache","Malbec","Sangiovese","Mourvèdre",
+    "Zinfandel","Touriga Nacional","Touriga Franca","Tinta Roriz","Tinta Barroca","Graciano","Garnacha"
+  ]);
+  function regionIsRed(region) {
+    let red = 0, white = 0;
+    region.varieties.forEach(v => { if (RED_GRAPES.has(v)) red++; else white++; });
+    return red >= white;
+  }
+
+  function wildfireProne(region) {
+    return region.country === "USA" || region.wildfireProne === true;
+  }
+
+  // Fetch daily-max PM2.5 across the ripening→harvest window and count smoky days.
+  async function fetchSmokeExposure(region) {
+    if (!wildfireProne(region)) return { available: false, applicable: false, smokyDays: 0, peakPM: 0 };
+    const today = new Date();
+    const south = region.lat < 0;
+    const year = today.getFullYear();
+    const start = south ? new Date(year, 1, 1) : new Date(year, 7, 1);    // Feb 1 / Aug 1
+    const endCal = south ? new Date(year, 3, 30) : new Date(year, 9, 31); // Apr 30 / Oct 31
+    const end = today < endCal ? today : endCal;
+    if (end < start) return { available: true, applicable: true, smokyDays: 0, peakPM: 0, note: "ripening window not yet reached" };
+
+    const url = `${AQ_HOST}?latitude=${region.lat}&longitude=${region.lng}` +
+      `&hourly=pm2_5&start_date=${fmtDate(start)}&end_date=${fmtDate(end)}&timezone=auto`;
+    try {
+      const aq = await fetchJSON(url);
+      const times = aq.hourly && aq.hourly.time, pm = aq.hourly && aq.hourly.pm2_5;
+      if (!times || !pm) return { available: false, applicable: true, smokyDays: 0, peakPM: 0 };
+      const dayMax = {};
+      for (let i = 0; i < times.length; i++) {
+        const d = times[i].slice(0, 10), v = pm[i];
+        if (v == null) continue;
+        if (dayMax[d] == null || v > dayMax[d]) dayMax[d] = v;
+      }
+      let smokyDays = 0, peak = 0;
+      Object.values(dayMax).forEach(v => { if (v > 35) smokyDays++; if (v > peak) peak = v; });
+      return { available: true, applicable: true, smokyDays, peakPM: Math.round(peak) };
+    } catch (e) {
+      return { available: false, applicable: true, smokyDays: 0, peakPM: 0, error: e.message };
+    }
+  }
+
+  // Score a smoke-exposure object into points + a factor (red penalised more).
+  function smokeFactor(smoke, region) {
+    if (!smoke || !smoke.applicable || !smoke.available || smoke.smokyDays <= 0) return { pts: 0, factor: null };
+    const red = regionIsRed(region);
+    const d = smoke.smokyDays, pk = smoke.peakPM;
+    let p;
+    if (d > 10 || pk > 250) p = red ? -18 : -9;       // severe (2020-like): reds often declassified
+    else if (d >= 4)        p = red ? -8  : -4;        // moderate
+    else                    p = red ? -3  : -1;        // light
+    return { pts: p, factor: { label: `[Ripening] Wildfire smoke (${d} smoky days, peak ${pk} µg/m³ PM2.5) — taint risk${red ? " (reds hit harder)" : ""}`, type: "neg" } };
+  }
+
+  // ==========================================================
+  // PHENOLOGY / TIMING ENGINE
+  // Buckets each day of the season into its growth stage and
+  // judges stage-specific weather. Detectable thresholds:
+  //   frost (Tmin <= 30F) at bud break
+  //   wet/cold flowering -> poor fruit set (coulure)
+  //   heat spikes (Tmax > 95F) at veraison
+  //   rain during ripening -> dilution / rot ("watery, not sweet")
+  // Stage windows are CALENDAR-based (approximate). The rigorous
+  // upgrade is GDD-threshold staging — see notes in README.
+  // ==========================================================
+  const FROST_F       = 30;  // tender-shoot frost threshold
+  const COLD_FLOWER_F = 60;  // cool day that disrupts flowering
+  const HEAT_SPIKE_F  = 95;  // vine shutdown / sunburn risk
+
+  // Map a date to a growth stage. Southern hemisphere shifted +6 months.
+  function stageForDate(date, lat) {
+    const south = lat < 0;
+    const sm = south ? (date.getMonth() + 6) % 12 : date.getMonth();
+    if (sm === 2 || sm === 3) return "budbreak";   // Mar–Apr (N)
+    if (sm === 4 || sm === 5) return "flowering";  // May–Jun
+    if (sm === 6 || sm === 7) return "veraison";   // Jul–Aug
+    if (sm === 8 || sm === 9) return "harvest";    // Sep–Oct
+    return null;                                    // dormant / off-season
+  }
+
+  // Which season-year does a date belong to (extended to include Mar/Sep)?
+  function seasonKeyForDate(date, lat) {
+    const m = date.getMonth(), y = date.getFullYear();
+    if (lat < 0) { if (m >= 8) return y; if (m <= 3) return y - 1; return null; }
+    return (m >= 2 && m <= 9) ? y : null;
+  }
+
+  // Extract current-season daily records (up to today) from archive series.
+  function currentSeasonDaily(ad, lat) {
+    const today = new Date();
+    const key = seasonKeyForDate(today, lat);
+    const out = { time: [], tmax: [], tmin: [], precip: [] };
+    if (key == null) return out; // off-season (winter) — no staged data yet
+    for (let i = 0; i < ad.time.length; i++) {
+      const d = new Date(ad.time[i] + "T00:00");
+      if (d > today) continue;
+      if (seasonKeyForDate(d, lat) === key && stageForDate(d, lat)) {
+        out.time.push(ad.time[i]);
+        out.tmax.push(ad.temperature_2m_max[i]);
+        out.tmin.push(ad.temperature_2m_min[i]);
+        out.precip.push(ad.precipitation_sum[i]);
+      }
+    }
+    return out;
+  }
+
+  // Compute per-stage metrics from a current-season daily slice.
+  function computeStages(slice, lat) {
+    const stages = {
+      budbreak:  { frostDays: 0, minTmin: 999, days: 0 },
+      flowering: { rain: 0, coldDays: 0, days: 0 },
+      veraison:  { heatSpikeDays: 0, days: 0 },
+      harvest:   { rain: 0, days: 0 }
+    };
+    for (let i = 0; i < slice.time.length; i++) {
+      const d = new Date(slice.time[i] + "T00:00");
+      const st = stageForDate(d, lat);
+      if (!st) continue;
+      const tx = slice.tmax[i], tn = slice.tmin[i], pr = slice.precip[i] || 0;
+      const S = stages[st]; S.days++;
+      if (st === "budbreak") {
+        if (tn != null) { if (tn <= FROST_F) S.frostDays++; if (tn < S.minTmin) S.minTmin = tn; }
+      } else if (st === "flowering") {
+        S.rain += pr; if (tx != null && tx < COLD_FLOWER_F) S.coldDays++;
+      } else if (st === "veraison") {
+        if (tx != null && tx > HEAT_SPIKE_F) S.heatSpikeDays++;
+      } else if (st === "harvest") {
+        S.rain += pr;
+      }
+    }
+    return stages;
+  }
+
+  // ----------------------------------------------------------
+  // GDD-BASED STAGE BOUNDARIES (the rigorous upgrade)
+  // Stages are defined by ACCUMULATED heat, not the calendar, so
+  // a warm year reaches flowering/veraison earlier — like real vines.
+  // Harvest anchor is variety-specific (uses the grape's ideal GDD).
+  // Thresholds are in cumulative °F GDD (base 50). Approximate &
+  // tunable — calibrate against observed phenology dates per region.
+  // ----------------------------------------------------------
+  const GDD_BUDBREAK_MAX = 350;     // frost-vulnerable early shoot growth
+  const GDD_FLOWER       = [350, 750];
+  const GDD_VERAISON     = [1250, 1750];
+  const GDD_HARVEST_FLOOR = 1750;   // never start "harvest" before this
+
+  // Average ideal-ripeness GDD across a region's varieties (for harvest anchor).
+  function varietyTargetGDD(region) {
+    const V = window.VARIETIES || {};
+    const mins = [];
+    region.varieties.forEach(v => {
+      const d = V[v];
+      if (d && d.idealGDD && typeof d.idealGDD.min === "number") mins.push(d.idealGDD.min);
+    });
+    return mins.length ? avg(mins) : 2200;
+  }
+
+  // Which stage does a given cumulative GDD fall into?
+  function stageForGDD(cumGDD, harvestStart) {
+    if (cumGDD <= GDD_BUDBREAK_MAX) return "budbreak";
+    if (cumGDD >= GDD_FLOWER[0] && cumGDD <= GDD_FLOWER[1]) return "flowering";
+    if (cumGDD >= GDD_VERAISON[0] && cumGDD <= GDD_VERAISON[1]) return "veraison";
+    if (cumGDD >= harvestStart) return "harvest";
+    return null; // transition periods we don't score
+  }
+
+  // GDD-based stage metrics. Walks days in order, accumulating heat,
+  // and buckets each day by the GDD reached.
+  function computeStagesGDD(slice, region) {
+    const target = varietyTargetGDD(region);
+    const harvestStart = Math.max(GDD_HARVEST_FLOOR, target - 150);
+    const stages = {
+      budbreak:  { frostDays: 0, minTmin: 999, days: 0 },
+      flowering: { rain: 0, coldDays: 0, days: 0 },
+      veraison:  { heatSpikeDays: 0, days: 0 },
+      harvest:   { rain: 0, days: 0 },
+      meta: { harvestStart: Math.round(harvestStart), targetGDD: Math.round(target) }
+    };
+    let cum = 0;
+    for (let i = 0; i < slice.time.length; i++) {
+      const tx = slice.tmax[i], tn = slice.tmin[i], pr = slice.precip[i] || 0;
+      const gddDay = (tx != null && tn != null) ? Math.max(0, (tx + tn) / 2 - BASE_TEMP_F) : 0;
+      cum += gddDay;
+      const st = stageForGDD(cum, harvestStart);
+      if (!st) continue;
+      const S = stages[st]; S.days++;
+      if (st === "budbreak") {
+        if (tn != null) { if (tn <= FROST_F) S.frostDays++; if (tn < S.minTmin) S.minTmin = tn; }
+      } else if (st === "flowering") {
+        S.rain += pr; if (tx != null && tx < COLD_FLOWER_F) S.coldDays++;
+      } else if (st === "veraison") {
+        if (tx != null && tx > HEAT_SPIKE_F) S.heatSpikeDays++;
+      } else if (st === "harvest") {
+        S.rain += pr;
+      }
+    }
+    stages.meta.currentCumGDD = Math.round(cum);
+    stages.meta.currentStage = stageForGDD(cum, harvestStart) || "transition";
+    return stages;
+  }
+
+  // Convert stage metrics into scored timing factors (variety-aware).
+  function timingFactors(stages, region) {
+    const factors = [];
+    let pts = 0;
+    const heatTol = varietyHeatProfile(region) === "tolerant";
+
+    // --- Bud break: frost ---
+    const fb = stages.budbreak;
+    if (fb.days > 0 && fb.frostDays > 0) {
+      const p = Math.max(-22, -8 * fb.frostDays); // severe; capped
+      pts += p;
+      factors.push({ label: `${fb.frostDays} frost day${fb.frostDays > 1 ? "s" : ""} at bud break (low ${Math.round(fb.minTmin)}°F)`, type: "neg", stage: "Bud break", pts: p });
+    }
+
+    // --- Flowering: wet or cold disrupts fruit set ---
+    const fl = stages.flowering;
+    if (fl.days > 0) {
+      if (fl.rain > 2.0) { pts -= 8; factors.push({ label: `Wet flowering (${round2(fl.rain)}") — poor fruit-set / coulure risk`, type: "neg", stage: "Flowering", pts: -8 }); }
+      else if (fl.coldDays >= 5) { pts -= 5; factors.push({ label: `Cold flowering (${fl.coldDays} cool days) — coulure risk`, type: "neg", stage: "Flowering", pts: -5 }); }
+      else { pts += 3; factors.push({ label: `Clean flowering window`, type: "pos", stage: "Flowering", pts: 3 }); }
+    }
+
+    // --- Veraison: heat spikes ---
+    const vr = stages.veraison;
+    if (vr.days > 0 && vr.heatSpikeDays >= 5) {
+      const p = heatTol ? -3 : -8;
+      pts += p;
+      factors.push({ label: `${vr.heatSpikeDays} heat-spike days (>95°F) in ripening`, type: "neg", stage: "Veraison", pts: p });
+    }
+
+    // --- Harvest approach: ripening-window rain (dilution / rot) ---
+    const hv = stages.harvest;
+    if (hv.days > 0) {
+      if (hv.rain > 4.0) { pts -= 10; factors.push({ label: `Heavy ripening rain (${round2(hv.rain)}") — dilution & rot risk`, type: "neg", stage: "Harvest", pts: -10 }); }
+      else if (hv.rain > 0 && hv.rain < 1.5) { pts += 5; factors.push({ label: `Dry ripening window (${round2(hv.rain)}") — concentration`, type: "pos", stage: "Harvest", pts: 5 }); }
+    }
+
+    return { pts, factors };
+  }
+
+  // ----------------------------------------------------------
+  // SCORING — convert climate into score + tier + factors
+  // Variety-aware via VARIETIES table.
+  // ----------------------------------------------------------
+  function scoreRegion(climate, region) {
+    const gddRatio = climate.gddCurrent / climate.gddAvg;
+    const rainRatio = climate.precipCurrent / climate.precipAvg;
+
+    // Baseline 50 = a perfectly NORMAL year for this region.
+    // This is a RELATIVE vintage index (deviation from normal),
+    // NOT a prediction of the wine's critic score. Positive factors
+    // mean "better than a typical year here"; negative, worse.
+    let score = 50;
+    const factors = [];
+
+    // --- Heat / GDD (deviation from THIS region's 10-yr norm) ---
+    // Normal heat for the region nets ~0; only genuine deviation moves the score.
+    const heatProfile = varietyHeatProfile(region);
+    if (gddRatio >= 0.92 && gddRatio <= 1.12) {
+      if (gddRatio >= 1.00) { score += 2; factors.push({ label: `Reliably warm — ideal ripening (${pct(gddRatio)})`, type: "pos" }); }
+      else { factors.push({ label: `Normal heat for the region (${pct(gddRatio)})`, type: "neu" }); }
+    } else if (gddRatio > 1.12 && gddRatio <= 1.28) {
+      if (heatProfile === "tolerant") { score += 3; factors.push({ label: `Warm — suits heat-tolerant varieties (${pct(gddRatio)})`, type: "pos" }); }
+      else { score -= 4; factors.push({ label: `Warmer than normal (${pct(gddRatio)})`, type: "neg" }); }
+    } else if (gddRatio > 1.28) {
+      if (heatProfile === "tolerant") { score -= 6; factors.push({ label: `Very warm — manageable here (${pct(gddRatio)})`, type: "neg" }); }
+      else { score -= 15; factors.push({ label: `Excessive heat — stress risk (${pct(gddRatio)})`, type: "neg" }); }
+    } else if (gddRatio >= 0.80 && gddRatio < 0.92) {
+      score -= 2; factors.push({ label: `Cooler than normal (${pct(gddRatio)})`, type: "neu" });
+    } else { // < 0.80
+      if (heatProfile === "sensitive") { score -= 6; factors.push({ label: `Cool — tolerable for cool-climate varieties (${pct(gddRatio)})`, type: "neg" }); }
+      else { score -= 13; factors.push({ label: `Insufficient heat — underripe risk (${pct(gddRatio)})`, type: "neg" }); }
+    }
+
+    // --- Rainfall (deviation from norm) ---
+    const droughtProfile = varietyDroughtProfile(region);
+    if (rainRatio >= 0.70 && rainRatio <= 1.20) {
+      factors.push({ label: `Normal rainfall (${pct(rainRatio)} of avg)`, type: "neu" }); // ~0
+    } else if (rainRatio > 1.20 && rainRatio <= 1.50) {
+      score -= 5;
+      factors.push({ label: `Wetter than normal — disease pressure (${pct(rainRatio)})`, type: "neg" });
+    } else if (rainRatio > 1.50) {
+      score -= 13;
+      factors.push({ label: `Excess rainfall — disease risk (${pct(rainRatio)})`, type: "neg" });
+    } else if (rainRatio >= 0.45 && rainRatio < 0.70) {
+      if (droughtProfile === "tolerant") { score += 2; factors.push({ label: `Dry — favorable for these varieties (${pct(rainRatio)})`, type: "pos" }); }
+      else { score -= 2; factors.push({ label: `Drier than normal (${pct(rainRatio)})`, type: "neu" }); }
+    } else { // < 0.45
+      if (droughtProfile === "tolerant") { score -= 3; factors.push({ label: `Very dry — drought-adapted, coping (${pct(rainRatio)})`, type: "neu" }); }
+      else { score -= 9; factors.push({ label: `Drought stress risk (${pct(rainRatio)})`, type: "neg" }); }
+    }
+
+    // --- Harvest rain risk (near-term forecast) ---
+    if (climate.harvestNear) {
+      if (climate.harvestRainRisk === "High") { score -= 11; factors.push({ label: `High harvest-rain risk (${climate.harvestRainForecast}" forecast)`, type: "neg" }); }
+      else if (climate.harvestRainRisk === "Medium") { score -= 4; factors.push({ label: `Some harvest-rain risk`, type: "neu" }); }
+      else { score += 4; factors.push({ label: `Dry harvest window forecast`, type: "pos" }); }
+    }
+
+    // --- Timing / phenology factors (frost, flowering, veraison, ripening rain) ---
+    let timing = { pts: 0, factors: [] };
+    if (climate.stages) {
+      timing = timingFactors(climate.stages, region);
+      score += timing.pts;
+      timing.factors.forEach(f => factors.push({ label: `[${f.stage}] ${f.label}`, type: f.type }));
+    }
+
+    // --- Wildfire smoke (US/wildfire-prone; live/recent seasons) ---
+    if (climate.smoke) {
+      const sf = smokeFactor(climate.smoke, region);
+      if (sf.factor) { score += sf.pts; factors.push(sf.factor); }
+    }
+
+    score = Math.max(0, Math.min(100, Math.round(score)));
+
+    // Tiers, shifted -25 from the old 90/65 cutoffs to match the
+    // recentred baseline — so classifications are unchanged, only
+    // the number is now honest (50 = normal).
+    let tier;
+    if (score >= 65) tier = "watch";
+    else if (score >= 40) tier = "normal";
+    else tier = "concern";
+
+    return { score, tier, factors, gddRatio, rainRatio, timing };
+  }
+
+  // Determine if a region's varieties are mostly heat-tolerant or heat-sensitive
+  function varietyHeatProfile(region) {
+    const V = window.VARIETIES || {};
+    let tol = 0, sens = 0;
+    region.varieties.forEach(v => {
+      const d = V[v];
+      if (!d) return;
+      if (d.heatTolerance === "High" || d.heatTolerance === "Very High") tol++;
+      if (d.heatTolerance === "Low") sens++;
+    });
+    if (tol > sens) return "tolerant";
+    if (sens > tol) return "sensitive";
+    return "neutral";
+  }
+
+  function varietyDroughtProfile(region) {
+    const V = window.VARIETIES || {};
+    let tol = 0, sens = 0;
+    region.varieties.forEach(v => {
+      const d = V[v];
+      if (!d) return;
+      if (d.droughtTolerance === "High" || d.droughtTolerance === "Very High") tol++;
+      if (d.droughtTolerance === "Low") sens++;
+    });
+    if (tol > sens) return "tolerant";
+    if (sens > tol) return "sensitive";
+    return "neutral";
+  }
+
+  // ----------------------------------------------------------
+  // Generate an auto-written outlook sentence
+  // ----------------------------------------------------------
+  function autoOutlook(climate, scored, region) {
+    const heat = scored.gddRatio >= 1.12 ? "running warmer than its 10-year norm"
+              : scored.gddRatio <= 0.88 ? "cooler than its 10-year norm"
+              : "tracking close to its 10-year norm for heat accumulation";
+    const rain = scored.rainRatio >= 1.5 ? "with notably wet conditions raising disease pressure"
+              : scored.rainRatio >= 1.15 ? "with above-average rainfall"
+              : scored.rainRatio <= 0.5 ? "under markedly dry conditions"
+              : "with broadly balanced rainfall";
+    const harvest = climate.harvestNear
+      ? (climate.harvestRainRisk === "High" ? " The near-term forecast shows meaningful rain entering the harvest window — a risk to watch."
+        : climate.harvestRainRisk === "Low" ? " The harvest window looks dry in the latest forecast, which is favorable."
+        : " Harvest-window weather is mixed in the current forecast.")
+      : "";
+    const tierPhrase = scored.tier === "watch" ? "Conditions point to a potentially excellent vintage."
+      : scored.tier === "concern" ? "Conditions are challenging this season; favor top producers and well-drained sites."
+      : "The season is tracking near its historical norm.";
+    return `Auto-assessed from live climate data: the ${region.name} growing season is ${heat}, ${rain}.${harvest} ${tierPhrase} (Based on ${climate.elapsedDays} days of season data vs a ${climate.yearsOfHistory}-year baseline.)`;
+  }
+
+  // ----------------------------------------------------------
+  // PUBLIC: auto-populate a single region object in place
+  // ----------------------------------------------------------
+  async function populateRegion(region, opts) {
+    const climate = await fetchRegionClimate(region, opts);
+    const scored = scoreRegion(climate, region);
+
+    // Preserve manual data first time
+    if (region.dataMode !== "live") {
+      region.manualOutlook = region.outlook;
+      region.manualScore = region.score;
+      region.manualTier = region.tier;
+      region.manualFactors = region.climateFactors;
+    }
+
+    region.score = scored.score;
+    region.tier = scored.tier;
+    region.climateFactors = scored.factors;
+    region.outlook = autoOutlook(climate, scored, region);
+    region.gdd = {
+      current: climate.gddCurrent,
+      average: climate.gddAvg,
+      unit: "°F GDD"
+    };
+    region.rainfall = {
+      ytd: pct(climate.precipCurrent / climate.precipAvg),
+      harvest_risk: climate.harvestRainRisk
+    };
+    region.dataSource = `Open-Meteo live data (${climate.hemisphere} Hem.) · fetched ${new Date(climate.fetchedAt).toLocaleString()} · ${climate.attribution}`;
+    region.dataMode = "live";
+    region._climate = climate;
+    return region;
+  }
+
+  // ----------------------------------------------------------
+  // PUBLIC: auto-populate ALL regions with progress callback
+  // ----------------------------------------------------------
+  async function populateAll(regions, onProgress, opts) {
+    let done = 0;
+    const total = regions.length;
+    const errors = [];
+    // Sequential to be gentle on the free API & give smooth progress
+    for (const r of regions) {
+      try {
+        await populateRegion(r, opts);
+      } catch (e) {
+        errors.push({ region: r.name, error: e.message });
+      }
+      done++;
+      if (onProgress) onProgress(done, total, r.name, errors.length);
+    }
+    return { done, total, errors };
+  }
+
+  // ---- utils ----
+  function avg(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; }
+  function round2(n) { return Math.round(n * 100) / 100; }
+  function pct(ratio) { return Math.round(ratio * 100) + "%"; }
+
+  return {
+    fetchRegionClimate,
+    scoreRegion,
+    populateRegion,
+    populateAll,
+    computeGDD,
+    seasonWindow,
+    _internal: { accumulateBySeasonYear, pastYearsTruncated, assessHarvestRain,
+                 stageForDate, currentSeasonDaily, computeStages, timingFactors,
+                 varietyHeatProfile, varietyDroughtProfile,
+                 computeStagesGDD, stageForGDD, varietyTargetGDD,
+                 fetchSmokeExposure, smokeFactor, regionIsRed, wildfireProne }
+  };
+})();
+
+window.WEATHER = WEATHER;
+
+</script>
+<script>
+// ============================================================
+// TERROIR INTELLIGENCE — APPLICATION LOGIC
+// ============================================================
+
+(function () {
+  "use strict";
+
+  // ---- STATE ----
+  let map = null;
+  let mapMarkers = [];
+  let geojsonLayer = null;
+  let config = loadConfig();
+
+  const TIER_META = {
+    watch:   { label: "Watch List",  color: "#2A6B3A", badge: "badge-watch" },
+    normal:  { label: "Normal",      color: "#1A4A6B", badge: "badge-normal" },
+    concern: { label: "Concern",     color: "#8B2020", badge: "badge-concern" },
+    unknown: { label: "Monitoring",  color: "#5A5A6A", badge: "badge-unknown" }
+  };
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  document.addEventListener("DOMContentLoaded", function () {
+    setSeasonBadge();
+    setLastUpdated();
+    renderTierCounts();
+    renderRegionCards(window.REGIONS);
+    renderReport();
+    wireNavigation();
+    wireFilters();
+    wireModal();
+    wireButtons();
+    applyConfigToSettings();
+  });
+
+  // ============================================================
+  // SEASON & DATE HELPERS
+  // ============================================================
+  function setSeasonBadge() {
+    const now = new Date();
+    const month = now.getMonth();
+    const quarter = Math.floor(month / 3) + 1;
+    const year = now.getFullYear();
+    const seasons = ["Winter", "Spring", "Summer", "Autumn"];
+    // Northern hemisphere season
+    let seasonIdx = 0;
+    if (month >= 2 && month <= 4) seasonIdx = 1;
+    else if (month >= 5 && month <= 7) seasonIdx = 2;
+    else if (month >= 8 && month <= 10) seasonIdx = 3;
+    document.getElementById("season-badge").textContent =
+      `Q${quarter} ${year} · ${seasons[seasonIdx]} (N. Hem.)`;
+  }
+
+  function setLastUpdated() {
+    const el = document.getElementById("last-updated");
+    if (el) {
+      const now = new Date();
+      el.textContent = now.toLocaleDateString("en-US", {
+        year: "numeric", month: "long", day: "numeric"
+      });
+    }
+  }
+
+  // ============================================================
+  // TIER COUNTS
+  // ============================================================
+  function renderTierCounts() {
+    const counts = { watch: 0, normal: 0, concern: 0, unknown: 0 };
+    window.REGIONS.forEach(r => { counts[r.tier] = (counts[r.tier] || 0) + 1; });
+    document.getElementById("count-watch").textContent = counts.watch;
+    document.getElementById("count-normal").textContent = counts.normal;
+    document.getElementById("count-concern").textContent = counts.concern;
+    document.getElementById("count-unknown").textContent = counts.unknown;
+  }
+
+  // ============================================================
+  // GLASS GAUGE — signature element (SVG wine glass that fills
+  // based on score)
+  // ============================================================
+  function glassGaugeSVG(score, tier) {
+    const fillPct = Math.max(0, Math.min(100, score)) / 100;
+    const color = TIER_META[tier].color;
+    // Glass bowl is roughly y=4 to y=30. Fill from bottom up.
+    const bowlTop = 5, bowlBottom = 29;
+    const fillY = bowlBottom - (bowlBottom - bowlTop) * fillPct;
+    return `
+      <svg viewBox="0 0 44 52" xmlns="http://www.w3.org/2000/svg" aria-label="Vintage outlook gauge">
+        <defs>
+          <clipPath id="bowl-${tier}-${score}">
+            <path d="M10 5 Q10 28 22 30 Q34 28 34 5 Z" />
+          </clipPath>
+        </defs>
+        <!-- wine fill -->
+        <rect x="8" y="${fillY}" width="28" height="${bowlBottom - fillY + 2}"
+              fill="${color}" opacity="0.78"
+              clip-path="url(#bowl-${tier}-${score})" />
+        <!-- glass outline -->
+        <path d="M10 5 Q10 28 22 30 Q34 28 34 5 Z"
+              fill="none" stroke="#3A3A4A" stroke-width="1.3" opacity="0.55"/>
+        <!-- stem -->
+        <line x1="22" y1="30" x2="22" y2="44" stroke="#3A3A4A" stroke-width="1.3" opacity="0.55"/>
+        <!-- base -->
+        <line x1="14" y1="46" x2="30" y2="46" stroke="#3A3A4A" stroke-width="1.6" opacity="0.55"/>
+      </svg>`;
+  }
+
+  // ============================================================
+  // REGION CARDS
+  // ============================================================
+  function renderRegionCards(regions) {
+    const grid = document.getElementById("region-grid");
+    grid.innerHTML = "";
+
+    if (regions.length === 0) {
+      grid.innerHTML = `<p style="color:var(--slate-lt);grid-column:1/-1;padding:2rem;text-align:center;">No regions match your filters.</p>`;
+      return;
+    }
+
+    regions.forEach(r => {
+      const card = document.createElement("div");
+      card.className = `region-card tier-${r.tier}`;
+      card.setAttribute("data-id", r.id);
+
+      const varietyChips = r.varieties
+        .map(v => `<span class="variety-chip">${v}</span>`)
+        .join("");
+
+      const factorTags = r.climateFactors
+        .map(f => `<span class="factor-tag factor-${f.type}">${f.label}</span>`)
+        .join("");
+
+      const liveDot = r.dataMode === "live"
+        ? `<span class="card-live-dot" title="Live climate data"></span>`
+        : "";
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div>
+            <div class="card-region-name">${liveDot}${r.name}</div>
+            <div class="card-country">${r.country} · ${r.subregion || ""}</div>
+          </div>
+          <div class="glass-gauge">${glassGaugeSVG(r.score, r.tier)}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-varieties">${varietyChips}</div>
+          <div class="card-factors">${factorTags}</div>
+        </div>
+        <div class="card-footer">
+          <span class="tier-badge ${TIER_META[r.tier].badge}">${TIER_META[r.tier].label}</span>
+          <span class="score-display">${r.score}<small>/100</small></span>
+        </div>
+      `;
+
+      card.addEventListener("click", () => openModal(r));
+      grid.appendChild(card);
+    });
+  }
+
+  // ============================================================
+  // FILTERS
+  // ============================================================
+  function wireFilters() {
+    ["filter-tier", "filter-country", "filter-variety"].forEach(id => {
+      document.getElementById(id).addEventListener("change", applyFilters);
+    });
+    document.getElementById("filter-search").addEventListener("input", applyFilters);
+  }
+
+  function applyFilters() {
+    const tier = document.getElementById("filter-tier").value;
+    const country = document.getElementById("filter-country").value;
+    const variety = document.getElementById("filter-variety").value;
+    const search = document.getElementById("filter-search").value.toLowerCase().trim();
+
+    const filtered = window.REGIONS.filter(r => {
+      if (tier !== "all" && r.tier !== tier) return false;
+      if (country !== "all" && r.country !== country) return false;
+      if (variety !== "all" && !r.varieties.includes(variety)) return false;
+      if (search && !r.name.toLowerCase().includes(search) &&
+          !r.country.toLowerCase().includes(search) &&
+          !(r.subregion || "").toLowerCase().includes(search)) return false;
+      return true;
+    });
+
+    renderRegionCards(filtered);
+  }
+
+  // ============================================================
+  // MODAL — region detail
+  // ============================================================
+  function wireModal() {
+    document.getElementById("modal-close").addEventListener("click", closeModal);
+    document.getElementById("modal-overlay").addEventListener("click", (e) => {
+      if (e.target.id === "modal-overlay") closeModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+  }
+
+  function openModal(r) {
+    const content = document.getElementById("modal-content");
+    const tierColor = TIER_META[r.tier].color;
+
+    // Build variety detail from VARIETIES knowledge base
+    const varietyDetails = r.varieties
+      .filter(v => window.VARIETIES[v])
+      .map(v => {
+        const vd = window.VARIETIES[v];
+        return `
+          <div style="margin-bottom:0.6rem;padding-bottom:0.6rem;border-bottom:1px solid var(--parchment-dk);">
+            <strong style="color:var(--wine-mid);">${v}</strong>
+            <span style="font-size:0.75rem;color:var(--slate-lt);"> · ${vd.heatTolerance} heat tolerance · ${vd.harvestRainSensitivity} rain sensitivity</span>
+            <p style="font-size:0.8rem;margin-top:0.25rem;">${vd.notesForReport}</p>
+          </div>`;
+      }).join("");
+
+    content.innerHTML = `
+      <h2>${r.name}</h2>
+      <div class="modal-sub">${r.country} · ${r.subregion || ""}</div>
+
+      <div class="modal-score-bar">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="tier-badge ${TIER_META[r.tier].badge}">${TIER_META[r.tier].label}</span>
+          <span class="score-display" style="font-size:1.5rem;">${r.score}<small>/100</small></span>
+        </div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width:${r.score}%;background:${tierColor};"></div>
+        </div>
+        <div style="font-size:0.68rem;color:var(--slate-lt);margin-top:0.3rem;">Vintage index · <strong>50 = a normal year for this region</strong> · relative, not a wine rating</div>
+      </div>
+
+      <div class="modal-section">
+        <h4>Vintage Outlook</h4>
+        <p>${r.outlook}</p>
+      </div>
+
+      <div class="modal-section">
+        <h4>Climate Indicators</h4>
+        <div class="climate-grid">
+          <div class="climate-stat">
+            <div class="stat-label">Growing Degree Days</div>
+            <div class="stat-value">${r.gdd.current} <span style="font-size:0.7rem;color:var(--slate-lt);">vs ${r.gdd.average} avg</span></div>
+          </div>
+          <div class="climate-stat">
+            <div class="stat-label">Rainfall (YTD vs avg)</div>
+            <div class="stat-value">${r.rainfall.ytd}</div>
+          </div>
+          <div class="climate-stat">
+            <div class="stat-label">Harvest Rain Risk</div>
+            <div class="stat-value">${r.rainfall.harvest_risk}</div>
+          </div>
+          <div class="climate-stat">
+            <div class="stat-label">GDD vs Average</div>
+            <div class="stat-value">${gddDelta(r.gdd)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h4>Climate Factors</h4>
+        <div class="card-factors">
+          ${r.climateFactors.map(f => `<span class="factor-tag factor-${f.type}">${f.label}</span>`).join("")}
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h4>Variety Notes</h4>
+        ${varietyDetails || "<p>No detailed variety data available.</p>"}
+      </div>
+
+      <div class="modal-section">
+        <h4>Data Source</h4>
+        <p style="font-size:0.78rem;color:var(--slate-lt);">${r.dataSource}</p>
+      </div>
+    `;
+
+    document.getElementById("modal-overlay").classList.add("open");
+  }
+
+  function gddDelta(gdd) {
+    const delta = gdd.current - gdd.average;
+    const pct = ((delta / gdd.average) * 100).toFixed(1);
+    const sign = delta >= 0 ? "+" : "";
+    const color = delta >= 0 ? "var(--watch-green)" : "var(--normal-blue)";
+    return `<span style="color:${color};">${sign}${pct}%</span>`;
+  }
+
+  function closeModal() {
+    document.getElementById("modal-overlay").classList.remove("open");
+  }
+
+  // ============================================================
+  // NAVIGATION
+  // ============================================================
+  function wireNavigation() {
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const view = btn.getAttribute("data-view");
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+        document.getElementById("view-" + view).classList.add("active");
+
+        if (view === "map") initMap();
+      });
+    });
+  }
+
+  // ============================================================
+  // MAP
+  // ============================================================
+  function initMap() {
+    if (map) { setTimeout(() => map.invalidateSize(), 100); return; }
+
+    map = L.map("region-map", { scrollWheelZoom: true }).setView([30, 10], 2);
+
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      maxZoom: 19
+    }).addTo(map);
+
+    window.REGIONS.forEach(r => {
+      const color = TIER_META[r.tier].color;
+      const marker = L.circleMarker([r.lat, r.lng], {
+        radius: 9,
+        fillColor: color,
+        color: "#fff",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.85
+      }).addTo(map);
+
+      marker.bindPopup(`
+        <div style="font-family:'Inter',sans-serif;min-width:180px;">
+          <strong style="font-size:0.95rem;color:#2D0A1A;">${r.name}</strong><br>
+          <span style="font-size:0.72rem;color:#6E6E82;text-transform:uppercase;letter-spacing:0.05em;">${r.country}</span>
+          <div style="margin-top:0.4rem;">
+            <span style="font-weight:700;font-size:1.1rem;color:${color};">${r.score}/100</span>
+            <span style="font-size:0.7rem;color:#6E6E82;"> · ${TIER_META[r.tier].label}</span>
+          </div>
+          <div style="font-size:0.72rem;color:#6E6E82;margin-top:0.3rem;">${r.varieties.slice(0,3).join(", ")}</div>
+          <button onclick="window.__openRegion('${r.id}')" style="margin-top:0.5rem;background:#9B2335;color:white;border:none;padding:0.3rem 0.7rem;border-radius:5px;font-size:0.72rem;cursor:pointer;">View Details</button>
+        </div>
+      `);
+      mapMarkers.push(marker);
+    });
+  }
+
+  // Bridge for map popup buttons
+  window.__openRegion = function (id) {
+    const r = window.REGIONS.find(x => x.id === id);
+    if (r) openModal(r);
+  };
+
+  // ============================================================
+  // GEOJSON LOADING
+  // ============================================================
+  function wireGeoJSON() {
+    const input = document.getElementById("geojson-upload");
+    if (!input) return;
+    input.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const gj = JSON.parse(ev.target.result);
+          config.geojson = gj;
+          saveConfig();
+          document.getElementById("geojson-status").textContent =
+            `✓ Loaded: ${file.name}. Switch to Region Map to view.`;
+          renderGeoJSONOnMap(gj);
+        } catch (err) {
+          document.getElementById("geojson-status").textContent =
+            `✕ Could not parse file. Ensure it's valid GeoJSON.`;
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  function renderGeoJSONOnMap(gj) {
+    if (!map) initMap();
+    if (geojsonLayer) map.removeLayer(geojsonLayer);
+    geojsonLayer = L.geoJSON(gj, {
+      style: {
+        color: "#9B2335",
+        weight: 1.5,
+        fillColor: "#C4526A",
+        fillOpacity: 0.15
+      },
+      onEachFeature: (feature, layer) => {
+        const name = feature.properties && (feature.properties.name || feature.properties.NAME || feature.properties.appellation);
+        if (name) layer.bindTooltip(name);
+      }
+    }).addTo(map);
+  }
+
+  // ============================================================
+  // REPORT GENERATION
+  // ============================================================
+  function renderReport() {
+    const doc = document.getElementById("report-document");
+    const now = new Date();
+    const quarter = Math.floor(now.getMonth() / 3) + 1;
+    const title = config.reportTitle || "Terroir Intelligence — Vintage Outlook";
+    const author = config.author || "";
+    const tagline = config.tagline || "";
+
+    const sorted = [...window.REGIONS].sort((a, b) => b.score - a.score);
+    const watch = sorted.filter(r => r.tier === "watch");
+    const concern = sorted.filter(r => r.tier === "concern");
+    const normal = sorted.filter(r => r.tier === "normal");
+
+    function entryHTML(r) {
+      return `
+        <div class="report-region-entry ${r.tier}">
+          <strong>${r.name}</strong> <span style="color:var(--slate-lt);font-size:0.8rem;">(${r.country}) — ${r.score}/100</span><br>
+          <span style="font-size:0.82rem;">${r.outlook}</span>
+        </div>`;
+    }
+
+    doc.innerHTML = `
+      <h1>${title}</h1>
+      <div class="report-meta">
+        ${author ? author + " · " : ""}Q${quarter} ${now.getFullYear()} · Generated ${now.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
+        ${tagline ? "<br><em>" + tagline + "</em>" : ""}
+      </div>
+
+      <p>This outlook cross-references seasonal climate forecasts and growing-season data against established viticultural thresholds for ${window.REGIONS.length} major wine regions. Scores reflect the projected quality of the current growing season relative to each region's historical norm.</p>
+
+      <h2>★ Watch List — Exceptional Conditions</h2>
+      <p style="font-size:0.82rem;color:var(--slate-lt);">Regions where conditions point to a potentially outstanding vintage. These are the wines to seek out, follow at release, and consider for cellaring.</p>
+      ${watch.length ? watch.map(entryHTML).join("") : "<p style='color:var(--slate-lt);'>No regions currently flagged as exceptional.</p>"}
+
+      <h2>⚠ Concern List — Difficult Conditions</h2>
+      <p style="font-size:0.82rem;color:var(--slate-lt);">Regions facing climatic challenges. Quality may be uneven; favor top producers and specific sub-zones noted below.</p>
+      ${concern.length ? concern.map(entryHTML).join("") : "<p style='color:var(--slate-lt);'>No regions currently flagged with significant concern.</p>"}
+
+      <h2>○ Normal Season — On Track</h2>
+      <p style="font-size:0.82rem;color:var(--slate-lt);">Regions tracking close to their historical norms.</p>
+      ${normal.length ? normal.map(entryHTML).join("") : "<p style='color:var(--slate-lt);'>None.</p>"}
+
+      <h2>Methodology & Sources</h2>
+      <p style="font-size:0.8rem;">Climate data drawn from NOAA Climate Prediction Center, EU Copernicus C3S seasonal forecasts, regional meteorological agencies (Météo-France, BOM Australia, DWD Germany, NIWA New Zealand), and ENSO advisories. Varietal climate thresholds based on established viticultural literature. This report represents a probabilistic outlook, not a guarantee — harvest-time weather remains the decisive variable in most regions.</p>
+      <p style="font-size:0.75rem;color:var(--slate-lt);margin-top:1rem;font-style:italic;">Independent analysis. Not affiliated with any winery or appellation body. For educational and informational purposes.</p>
+    `;
+  }
+
+  // ============================================================
+  // CONFIG / PERSISTENCE (in-memory only; export to file for durability)
+  // ============================================================
+  function loadConfig() {
+    return {
+      reportTitle: "Terroir Intelligence — Vintage Outlook",
+      author: "",
+      tagline: "",
+      geojson: null
+    };
+  }
+
+  function saveConfig() { /* in-memory; user exports config file for durability */ }
+
+  function applyConfigToSettings() {
+    const t = document.getElementById("setting-report-title");
+    const a = document.getElementById("setting-author");
+    const g = document.getElementById("setting-tagline");
+    if (t) t.value = config.reportTitle;
+    if (a) a.value = config.author;
+    if (g) g.value = config.tagline;
+  }
+
+  // ============================================================
+  // BUTTONS
+  // ============================================================
+  function wireButtons() {
+    wireGeoJSON();
+
+    // Settings inputs -> config
+    bindSetting("setting-report-title", "reportTitle");
+    bindSetting("setting-author", "author");
+    bindSetting("setting-tagline", "tagline");
+
+    // Auto-populate from live climate data
+    const autopop = document.getElementById("autopop-btn");
+    if (autopop) autopop.addEventListener("click", runAutoPopulate);
+
+    // Revert to manual
+    const revert = document.getElementById("revert-btn");
+    if (revert) revert.addEventListener("click", revertToManual);
+
+    // Export report (switches to report view + print)
+    const exp = document.getElementById("export-btn");
+    if (exp) exp.addEventListener("click", () => {
+      document.querySelector('[data-view="report"]').click();
+    });
+
+    // Copy report as text
+    const copyBtn = document.getElementById("copy-report-btn");
+    if (copyBtn) copyBtn.addEventListener("click", copyReportText);
+
+    // Print report
+    const printBtn = document.getElementById("print-report-btn");
+    if (printBtn) printBtn.addEventListener("click", () => window.print());
+
+    // Export config
+    const exportCfg = document.getElementById("export-config-btn");
+    if (exportCfg) exportCfg.addEventListener("click", exportConfig);
+
+    // Import config
+    const importCfg = document.getElementById("import-config");
+    if (importCfg) importCfg.addEventListener("change", importConfig);
+
+    // Reset
+    const reset = document.getElementById("reset-btn");
+    if (reset) reset.addEventListener("click", () => location.reload());
+  }
+
+  function bindSetting(elId, key) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      config[key] = el.value;
+      saveConfig();
+      renderReport();
+    });
+  }
+
+  function copyReportText() {
+    const now = new Date();
+    const quarter = Math.floor(now.getMonth() / 3) + 1;
+    const sorted = [...window.REGIONS].sort((a, b) => b.score - a.score);
+    const watch = sorted.filter(r => r.tier === "watch");
+    const concern = sorted.filter(r => r.tier === "concern");
+    const normal = sorted.filter(r => r.tier === "normal");
+
+    let txt = `${config.reportTitle}\n`;
+    txt += `${config.author ? config.author + " · " : ""}Q${quarter} ${now.getFullYear()}\n`;
+    txt += `${"=".repeat(50)}\n\n`;
+
+    txt += `WATCH LIST — EXCEPTIONAL CONDITIONS\n${"-".repeat(40)}\n`;
+    watch.forEach(r => { txt += `\n${r.name} (${r.country}) — ${r.score}/100\n${r.outlook}\n`; });
+
+    txt += `\n\nCONCERN LIST — DIFFICULT CONDITIONS\n${"-".repeat(40)}\n`;
+    if (concern.length === 0) txt += "\nNone currently flagged.\n";
+    concern.forEach(r => { txt += `\n${r.name} (${r.country}) — ${r.score}/100\n${r.outlook}\n`; });
+
+    txt += `\n\nNORMAL SEASON — ON TRACK\n${"-".repeat(40)}\n`;
+    normal.forEach(r => { txt += `\n${r.name} (${r.country}) — ${r.score}/100\n${r.outlook}\n`; });
+
+    navigator.clipboard.writeText(txt).then(() => {
+      const btn = document.getElementById("copy-report-btn");
+      btn.textContent = "✓ Copied!";
+      setTimeout(() => btn.textContent = "Copy as Text", 1500);
+    });
+  }
+
+  function exportConfig() {
+    const data = JSON.stringify(config, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "terroir-config.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importConfig(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        config = Object.assign(config, imported);
+        applyConfigToSettings();
+        renderReport();
+        if (config.geojson) renderGeoJSONOnMap(config.geojson);
+      } catch (err) {
+        alert("Could not import config file.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ============================================================
+  // AUTO-POPULATE FROM LIVE CLIMATE DATA
+  // ============================================================
+  async function runAutoPopulate() {
+    const btn = document.getElementById("autopop-btn");
+    const statusEl = document.getElementById("autopop-status");
+    const barEl = document.getElementById("autopop-bar");
+    const msgEl = document.getElementById("autopop-msg");
+    const noticeEl = document.getElementById("autopop-notice");
+
+    btn.disabled = true;
+    btn.textContent = "⚡ Fetching live data…";
+    statusEl.hidden = false;
+    barEl.style.width = "0%";
+
+    try {
+      const result = await window.WEATHER.populateAll(
+        window.REGIONS,
+        (done, total, name, errCount) => {
+          const pct = Math.round((done / total) * 100);
+          barEl.style.width = pct + "%";
+          msgEl.textContent = `Processed ${done}/${total} — ${name}` +
+            (errCount ? ` (${errCount} issue${errCount > 1 ? "s" : ""})` : "");
+          // Live re-render so the user sees cards update as data arrives
+          applyFilters();
+          renderTierCounts();
+        }
+      );
+
+      // Final render
+      applyFilters();
+      renderTierCounts();
+      renderReport();
+      setLastUpdated();
+      noticeEl.hidden = false;
+
+      if (result.errors.length) {
+        msgEl.textContent = `Done — ${result.done - result.errors.length}/${result.total} updated. ${result.errors.length} could not be fetched (see console).`;
+        console.warn("Auto-populate issues:", result.errors);
+      } else {
+        msgEl.textContent = `✓ All ${result.total} regions updated from live climate data.`;
+      }
+      setTimeout(() => { statusEl.hidden = true; }, 4000);
+
+    } catch (e) {
+      msgEl.textContent = `Could not reach Open-Meteo: ${e.message}. Check your connection.`;
+      console.error(e);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "⚡ Refresh Live Climate Data";
+    }
+  }
+
+  function revertToManual() {
+    window.REGIONS.forEach(r => {
+      if (r.dataMode === "live" && r.manualScore != null) {
+        r.score = r.manualScore;
+        r.tier = r.manualTier;
+        r.outlook = r.manualOutlook;
+        r.climateFactors = r.manualFactors;
+        r.dataMode = "manual";
+      }
+    });
+    applyFilters();
+    renderTierCounts();
+    renderReport();
+    document.getElementById("autopop-notice").hidden = true;
+  }
+
+})();
+
+</script>
+</body>
+</html>
