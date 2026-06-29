@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Terroir Intelligence — Back-Testing Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --wine-deep:#2D0A1A;--wine-mid:#6B1A33;--wine-bright:#9B2335;--wine-blush:#C4526A;
+    --parchment:#F5EFE0;--parchment-dk:#E8DFCA;--slate:#3A3A4A;--slate-lt:#6E6E82;
+    --cream:#FAF7F2;--gold:#C9A84C;--gold-lt:#E8D48A;
+    --pos:#2A6B3A;--pos-lt:#D6EFD8;--neg:#8B2020;--neg-lt:#F5D5D5;--neu:#1A4A6B;
+    --radius:10px;--shadow:0 2px 14px rgba(45,10,26,0.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--slate);line-height:1.5;padding:1.5rem}
+  .wrap{max-width:1140px;margin:0 auto}
+  h1{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--wine-deep);margin-bottom:0.25rem}
+  .sub{color:var(--slate-lt);font-size:0.9rem;margin-bottom:1.25rem}
+  .panel{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.4rem;margin-bottom:1.25rem}
+  .panel h2{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--wine-mid);margin-bottom:0.9rem;padding-bottom:0.5rem;border-bottom:1px solid var(--parchment-dk)}
+  .btn{background:var(--wine-bright);color:#fff;border:none;padding:0.65rem 1.4rem;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--wine-mid)} .btn:disabled{opacity:0.6;cursor:wait}
+  .btn-sec{background:#fff;color:var(--wine-bright);border:1.5px solid var(--wine-bright)}
+  .note{font-size:0.78rem;color:var(--wine-deep);background:var(--gold-lt);border:1px solid var(--gold);border-radius:8px;padding:0.7rem 0.9rem;margin-bottom:1rem;line-height:1.55}
+  .prog{height:8px;background:var(--parchment-dk);border-radius:4px;overflow:hidden;margin:0.8rem 0}
+  .prog-fill{height:100%;width:0;background:linear-gradient(90deg,var(--wine-mid),var(--wine-bright));border-radius:4px;transition:width .3s}
+  .prog-msg{font-size:0.8rem;color:var(--slate-lt)}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+  @media(max-width:760px){.stat-grid{grid-template-columns:1fr 1fr}}
+  .stat{background:var(--cream);border-radius:8px;padding:0.9rem 1rem;text-align:center}
+  .stat .v{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--wine-deep);line-height:1}
+  .stat .l{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate-lt);margin-top:0.3rem}
+  .stat .interp{font-size:0.7rem;margin-top:0.25rem;font-weight:600}
+
+  table{width:100%;border-collapse:collapse;font-size:0.8rem;margin-top:0.5rem}
+  th,td{text-align:left;padding:0.45rem 0.6rem;border-bottom:1px solid var(--parchment-dk)}
+  th{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate-lt)}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .resid-pos{color:var(--pos)} .resid-neg{color:var(--neg)}
+  .corr-good{color:var(--pos);font-weight:700} .corr-mid{color:var(--gold);font-weight:700} .corr-bad{color:var(--neg);font-weight:700}
+
+  .tune-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem 1.5rem}
+  @media(max-width:760px){.tune-grid{grid-template-columns:1fr}}
+  .tune{display:flex;align-items:center;gap:0.6rem;font-size:0.78rem}
+  .tune label{flex:1;color:var(--slate)}
+  .tune input[type=range]{flex:1.2;accent-color:var(--wine-bright)}
+  .tune .tv{width:38px;text-align:right;font-weight:700;font-family:'Playfair Display',serif;color:var(--wine-bright)}
+  .hidden{display:none}
+  code,pre{font-family:ui-monospace,monospace;font-size:0.78rem}
+  pre{background:var(--cream);border-radius:8px;padding:0.8rem;overflow-x:auto;white-space:pre-wrap}
+  a{color:var(--wine-bright)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Back-Testing Lab</h1>
+  <div style="display:inline-block;background:var(--wine-deep);color:#fff;font-size:0.72rem;padding:0.25rem 0.7rem;border-radius:6px;margin:0.2rem 0 0.6rem;font-weight:600;letter-spacing:0.02em">
+    BUILD v4 · Robert Parker data · 208 region-years · 16 regions · includes §4 Factor Regression
+  </div>
+  <p class="sub" style="margin-top:0">Score completed past seasons from real Open-Meteo archive weather, compare against known vintage quality, and tune the model weights to fit. Because the index is <em>relative</em>, the headline metric is <strong>rank correlation</strong> — does the model order each region's good and bad years correctly?</p>
+
+  <div class="note">
+    <strong>About the ground-truth data:</strong> these vintage scores are from a single critic (Robert Parker Wine Advocate) used as a <strong>private internal validation key</strong> — wider range than an aggregate, so the model has real signal to fit. Don't republish these scores in your product. Weather data by <a href="https://open-meteo.com" target="_blank">Open-Meteo.com</a>.
+  </div>
+
+  <div class="panel">
+    <h2>1 · Run the back-test</h2>
+    <p style="font-size:0.84rem;color:var(--slate-lt);margin-bottom:0.8rem">Fetches full-season archive weather for each region-year (and the 10 years before it, for the baseline), scores it with the current model, and correlates predictions against known quality. ~<span id="pair-count">—</span> region-years across <span id="region-count">—</span> regions.</p>
+    <button class="btn" id="run-btn">▶ Run Back-Test (fetches live data)</button>
+    <div class="prog hidden" id="prog"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-msg hidden" id="prog-msg"></div>
+  </div>
+
+  <div class="panel hidden" id="results">
+    <h2>2 · Results</h2>
+    <div class="stat-grid">
+      <div class="stat"><div class="v" id="stat-spearman">—</div><div class="l">Pooled rank corr.</div><div class="interp" id="interp-spearman"></div></div>
+      <div class="stat"><div class="v" id="stat-regions">—</div><div class="l">Regions tested</div></div>
+      <div class="stat"><div class="v" id="stat-pairs">—</div><div class="l">Region-years</div></div>
+      <div class="stat"><div class="v" id="stat-hit">—</div><div class="l">Best/worst year hit-rate</div><div class="interp" id="interp-hit"></div></div>
+    </div>
+
+    <h3 style="margin:1.4rem 0 0.4rem;font-size:0.9rem;color:var(--slate)">Predicted vs. actual (per-region z-scores, pooled)</h3>
+    <div id="scatter"></div>
+
+    <h3 style="margin:1.4rem 0 0.4rem;font-size:0.9rem;color:var(--slate)">Per-region rank correlation</h3>
+    <table id="region-table"><thead><tr><th>Region</th><th class="num">Years</th><th class="num">Spearman r</th><th>Reads as</th></tr></thead><tbody></tbody></table>
+
+    <h3 style="margin:1.4rem 0 0.4rem;font-size:0.9rem;color:var(--slate)">Where the model misses (largest residuals)</h3>
+    <table id="resid-table"><thead><tr><th>Region</th><th class="num">Year</th><th class="num">Predicted idx</th><th class="num">Actual (z)</th><th class="num">Residual</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="panel hidden" id="tuning">
+    <h2>3 · Tune the weights</h2>
+    <p style="font-size:0.84rem;color:var(--slate-lt);margin-bottom:0.8rem">Adjust the point values and watch the correlation update instantly (uses cached weather — no refetch). When you find a better fit, export and paste into <code>weather.js</code>.</p>
+    <div class="tune-grid" id="tune-grid"></div>
+    <div style="margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+      <button class="btn btn-sec" id="reset-weights">Reset to defaults</button>
+      <button class="btn" id="export-weights">Export tuned weights</button>
+    </div>
+    <pre id="weights-out" class="hidden"></pre>
+  </div>
+
+  <div class="panel hidden" id="regression">
+    <h2>4 · Discover factors from data (regression)</h2>
+    <p style="font-size:0.84rem;color:var(--slate-lt);margin-bottom:0.8rem">Instead of hand-set weights, <strong>fit</strong> a regularized regression of Parker scores onto weather features — standardized <em>within each region</em>, then pooled, so it learns the real sign and weight of each factor. Cross-validated (5-fold), so the numbers below are <strong>out-of-sample</strong> skill, not memorization. Run the back-test first (it fetches & caches the weather).</p>
+    <div class="tune" style="max-width:420px"><label>Regularization (λ) — higher = simpler/safer</label><input type="range" id="ridge-lambda" min="0.5" max="25" step="0.5" value="4"/><span class="tv" id="ridge-lambda-v">4</span></div>
+    <button class="btn" id="reg-btn" style="margin-top:0.7rem">Fit factors from data</button>
+    <div class="hidden" id="reg-results">
+      <div class="stat-grid" style="margin-top:1.1rem">
+        <div class="stat"><div class="v" id="reg-spearman">—</div><div class="l">Out-of-sample rank corr.</div><div class="interp" id="reg-interp"></div></div>
+        <div class="stat"><div class="v" id="reg-r2">—</div><div class="l">Cross-val R²</div></div>
+        <div class="stat"><div class="v" id="reg-n">—</div><div class="l">Region-years used</div></div>
+      </div>
+      <h3 style="margin:1.3rem 0 0.4rem;font-size:0.9rem;color:var(--slate)">Learned factor weights (within-region standardized — sign & size are what matter)</h3>
+      <table id="reg-table"><thead><tr><th>Weather feature</th><th class="num">Coefficient</th><th>Reads as</th></tr></thead><tbody></tbody></table>
+      <p style="font-size:0.76rem;color:var(--slate-lt);margin-top:0.6rem">Positive = the feature <em>raises</em> Parker scores in these regions; negative = lowers. Compare these signs to the hand-built model's assumptions — disagreements are where your intuition was off.</p>
+      <button class="btn" id="apply-learned-btn" style="margin-top:0.8rem">Apply learned coefficients to Section 2</button>
+      <div class="hidden" id="apply-status" style="margin-top:0.5rem;font-size:0.8rem;color:var(--green)"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// FACTOR DISCOVERY — ridge regression with k-fold cross-validation
+// ============================================================
+const REG_FEATURES = [
+  ["gdd","Season heat (total GDD)"],
+  ["gddVsIdeal","Heat vs. variety ideal"],
+  ["rainSeason","Season rainfall"],
+  ["rainHarvest","Harvest-window rain (Aug–Oct)"],
+  ["frostDays","Spring frost nights"],
+  ["heatSpikes","Summer heat spikes (>95°F)"],
+  ["diurnal","Ripening diurnal range"]
+];
+function _mT(A){const r=A.length,c=A[0].length,T=[];for(let j=0;j<c;j++){T.push([]);for(let i=0;i<r;i++)T[j].push(A[i][j]);}return T;}
+function _mMul(A,B){const r=A.length,n=A[0].length,c=B[0].length,O=[];for(let i=0;i<r;i++){O.push([]);for(let j=0;j<c;j++){let s=0;for(let k=0;k<n;k++)s+=A[i][k]*B[k][j];O[i].push(s);}}return O;}
+function _mInv(M){const n=M.length;const A=M.map((row,i)=>row.concat(Array.from({length:n},(_,j)=>i===j?1:0)));
+  for(let col=0;col<n;col++){let piv=col;for(let r=col+1;r<n;r++)if(Math.abs(A[r][col])>Math.abs(A[piv][col]))piv=r;[A[col],A[piv]]=[A[piv],A[col]];
+    const d=A[col][col]||1e-9;for(let j=0;j<2*n;j++)A[col][j]/=d;
+    for(let r=0;r<n;r++){if(r===col)continue;const f=A[r][col];for(let j=0;j<2*n;j++)A[r][j]-=f*A[col][j];}}
+  return A.map(row=>row.slice(n));}
+function ridge(X,y,lambda){const Xt=_mT(X),XtX=_mMul(Xt,X),p=XtX.length;for(let i=0;i<p;i++)XtX[i][i]+=lambda;
+  const Xty=_mMul(Xt,y.map(v=>[v]));return _mMul(_mInv(XtX),Xty).map(r=>r[0]);}
+function zCols(rows){const n=rows.length,p=rows[0].length,mn=[],sd=[];
+  for(let j=0;j<p;j++){let m=0;for(let i=0;i<n;i++)m+=rows[i][j];m/=n;let s=0;for(let i=0;i<n;i++)s+=(rows[i][j]-m)**2;s=Math.sqrt(s/n)||1;mn.push(m);sd.push(s);}
+  return rows.map(r=>r.map((v,j)=>(v-mn[j])/sd[j]));}
+function zArr(a){const n=a.length,m=a.reduce((x,y)=>x+y,0)/n;const s=Math.sqrt(a.reduce((x,y)=>x+(y-m)*(y-m),0)/n)||1;return a.map(v=>(v-m)/s);}
+
+function buildDataset(){
+  const X=[],y=[];
+  Object.keys(CACHE).forEach(id=>{
+    const years=Object.keys(CACHE[id]).map(Number).filter(yy=>CACHE[id][yy]&&CACHE[id][yy].features&&VINTAGES.find(v=>v[0]===id&&v[1]===yy));
+    if(years.length<4) return; // need enough years to standardize within region
+    const fr=[],yr=[];
+    years.forEach(yy=>{ const f=CACHE[id][yy].features; fr.push(REG_FEATURES.map(([k])=>f[k])); yr.push(VINTAGES.find(v=>v[0]===id&&v[1]===yy)[2]); });
+    const frz=zCols(fr), yrz=zArr(yr);
+    frz.forEach((r,i)=>{ X.push(r); y.push(yrz[i]); });
+  });
+  return {X,y};
+}
+function kFoldCV(X,y,lambda,k){
+  const n=X.length,idx=[...Array(n).keys()];
+  for(let i=n-1;i>0;i--){const j=Math.floor((Math.sin(i*99.7)*0.5+0.5)*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+  const preds=new Array(n),acts=new Array(n);
+  for(let f=0;f<k;f++){const test=idx.filter((_,i)=>i%k===f),train=idx.filter((_,i)=>i%k!==f);
+    const beta=ridge(train.map(i=>X[i]),train.map(i=>y[i]),lambda);
+    test.forEach(i=>{let p=0;for(let j=0;j<beta.length;j++)p+=X[i][j]*beta[j];preds[i]=p;acts[i]=y[i];});}
+  const ym=acts.reduce((a,b)=>a+b,0)/n;let ssr=0,sst=0;for(let i=0;i<n;i++){ssr+=(acts[i]-preds[i])**2;sst+=(acts[i]-ym)**2;}
+  return {r2:1-ssr/sst, spearman:pearson(rankArr(preds),rankArr(acts))};
+}
+function runRegression(){
+  if(!CACHE||!Object.keys(CACHE).length){ alert("Run the back-test first — it fetches and caches the weather the regression needs."); return; }
+  const {X,y}=buildDataset();
+  if(X.length<20){ alert("Not enough region-years with features ("+X.length+"). Make sure the back-test ran."); return; }
+  const lambda=parseFloat(document.getElementById("ridge-lambda").value);
+  const beta=ridge(X,y,lambda);
+  const cv=kFoldCV(X,y,lambda,5);
+  document.getElementById("reg-results").classList.remove("hidden");
+  document.getElementById("reg-spearman").textContent=isFinite(cv.spearman)?cv.spearman.toFixed(2):"—";
+  document.getElementById("reg-r2").textContent=isFinite(cv.r2)?cv.r2.toFixed(2):"—";
+  document.getElementById("reg-n").textContent=X.length;
+  const ie=document.getElementById("reg-interp");
+  ie.textContent=cv.spearman>=0.45?"strong for weather":cv.spearman>=0.3?"moderate":cv.spearman>=0.15?"weak":"little";
+  ie.className="interp "+(cv.spearman>=0.45?"corr-good":cv.spearman>=0.3?"corr-mid":"corr-bad");
+  const rows=REG_FEATURES.map(([k,label],j)=>({label,beta:beta[j]})).sort((a,b)=>Math.abs(b.beta)-Math.abs(a.beta));
+  const tb=document.querySelector("#reg-table tbody");tb.innerHTML="";
+  rows.forEach(r=>{const cls=r.beta>0.04?"corr-good":(r.beta<-0.04?"corr-bad":"");
+    const reads=r.beta>0.08?"raises quality":r.beta>0.04?"slightly raises":r.beta<-0.08?"lowers quality":r.beta<-0.04?"slightly lowers":"≈ no effect";
+    tb.innerHTML+=`<tr><td>${r.label}</td><td class="num ${cls}">${r.beta>0?"+":""}${r.beta.toFixed(2)}</td><td>${reads}</td></tr>`;});
+}
+document.getElementById("ridge-lambda").addEventListener("input",e=>document.getElementById("ridge-lambda-v").textContent=e.target.value);
+document.getElementById("reg-btn").addEventListener("click",runRegression);
+// Apply learned coefficients: map regression betas back to hand weights
+document.getElementById("apply-learned-btn").addEventListener("click",function(){
+  if(!CACHE||!Object.keys(CACHE).length){alert("Run back-test first.");return;}
+  const {X,y}=buildDataset();
+  if(X.length<10){alert("Not enough data.");return;}
+  const lambda=parseFloat(document.getElementById("ridge-lambda").value);
+  const beta=ridge(X,y,lambda);
+  // Map learned coefficients to weight updates. REG_FEATURES order: [gdd, gddVsIdeal, rainSeason, rainHarvest, frostDays, heatSpikes, diurnal]
+  // Positive coef = raise score; negative = lower score
+  const scale=8; // scale factor for converting z-space to weight space
+  const newW={...WEIGHTS};
+  // Heat (learned +0.11 to +0.16): flip penalties to rewards
+  const heatBeta=(beta[0]+beta[1])/2; // avg of GDD and GDD-vs-ideal
+  if(heatBeta>0){
+    newW.heatHotSens=Math.abs(WEIGHTS.heatHotSens)*0.7;
+    newW.heatHotTol=Math.abs(WEIGHTS.heatHotTol)*0.7;
+    newW.heatWarmSens=Math.abs(WEIGHTS.heatWarmSens)*0.7;
+  }
+  // Rain (learned -0.02 to -0.24): reduce penalties
+  const rainBeta=(beta[2]+beta[3])/2; // avg of season and harvest rain
+  newW.rainExcess=WEIGHTS.rainExcess*0.2;
+  newW.rainWet=WEIGHTS.rainWet*0.2;
+  newW.rainVdryTol=WEIGHTS.rainVdryTol*0.3;
+  newW.rainVdryOther=WEIGHTS.rainVdryOther*0.3;
+  // Frost (learned -0.07): small penalty
+  newW.frostPerDay=WEIGHTS.frostPerDay*0.5;
+  // Heat spikes (learned -0.11): reduce penalty
+  newW.veraisonSpikeTol=WEIGHTS.veraisonSpikeTol*0.2;
+  newW.veraisonSpikeSens=WEIGHTS.veraisonSpikeSens*0.2;
+  // Diurnal (learned +0.07): bonus (no direct weight, kept as narrative)
+  // Apply new weights
+  WEIGHTS=newW;
+  document.getElementById("apply-status").textContent="Applied. Recomputing scores...";
+  document.getElementById("apply-status").classList.remove("hidden");
+  setTimeout(()=>{
+    computeAndRender();
+    document.getElementById("apply-status").textContent="✓ Applied learned coefficients. Section 2 updated with new correlation.";
+  },100);
+});
+</script>
+
+<script>
+// ============================================================
+// GROUND-TRUTH VINTAGES (Robert Parker Wine Advocate — single critic,
+// wider range. Internal validation key only — do not republish.)
+// NOTE: yakima 2019 corrected from "3" (typo) to 93 — fix at source in entry tool.
+// ============================================================
+const VINTAGES = [
+  ["baden-pinot",2023,93],["baden-pinot",2022,94],["baden-pinot",2021,92],["baden-pinot",2020,93],["baden-pinot",2019,93],["baden-pinot",2018,91],["baden-pinot",2017,88],["baden-pinot",2016,90],["baden-pinot",2015,90],["baden-pinot",2014,91],["baden-pinot",2013,89],["baden-pinot",2012,90],["baden-pinot",2011,87],["baden-pinot",2010,91],["baden-pinot",2009,87],["baden-pinot",2008,88],["baden-pinot",2007,89],["baden-pinot",2006,91],["baden-pinot",2005,88],["baden-pinot",2004,91],["baden-pinot",2003,89],["baden-pinot",2002,90],["baden-pinot",2001,90],["baden-pinot",2000,91],
+  ["barolo",2023,94],["barolo",2022,89],["barolo",2021,97],["barolo",2020,91],["barolo",2019,96],["barolo",2018,92],["barolo",2017,92],["barolo",2016,97],["barolo",2015,93],["barolo",2014,89],["barolo",2013,94],["barolo",2012,89],["barolo",2011,89],["barolo",2010,98],["barolo",2009,95],["barolo",2008,91],["barolo",2007,95],["barolo",2006,97],["barolo",2005,93],["barolo",2004,95],["barolo",2003,83],["barolo",2002,73],["barolo",2001,96],["barolo",2000,95],["barolo",1999,95],["barolo",1998,92],["barolo",1997,93],["barolo",1996,97],["barolo",1995,93],["barolo",1994,77],["barolo",1993,91],["barolo",1992,74],["barolo",1991,76],["barolo",1990,96],["barolo",1989,97],["barolo",1988,90],["barolo",1987,86],["barolo",1986,96],["barolo",1985,95],["barolo",1984,65],["barolo",1983,75],["barolo",1982,96],["barolo",1981,80],["barolo",1980,88],["barolo",1979,88],["barolo",1978,90],["barolo",1976,92],["barolo",1975,85],["barolo",1971,94],["barolo",1970,93],
+  ["bordeaux",2023,94],["bordeaux",2022,95],["bordeaux",2021,89],["bordeaux",2020,96],["bordeaux",2019,96],["bordeaux",2018,94],["bordeaux",2017,91],["bordeaux",2016,97],["bordeaux",2015,93],["bordeaux",2014,95],["bordeaux",2013,81],["bordeaux",2012,92],["bordeaux",2011,88],["bordeaux",2010,98],["bordeaux",2009,99],["bordeaux",2008,91],["bordeaux",2007,86],["bordeaux",2006,87],["bordeaux",2005,95],["bordeaux",2004,88],["bordeaux",2003,95],["bordeaux",2002,88],["bordeaux",2001,88],["bordeaux",2000,96],["bordeaux",1999,88],["bordeaux",1998,87],["bordeaux",1997,82],["bordeaux",1996,88],["bordeaux",1995,88],["bordeaux",1994,85],["bordeaux",1993,77],["bordeaux",1992,75],["bordeaux",1991,74],["bordeaux",1990,90],["bordeaux",1989,86],["bordeaux",1988,85],["bordeaux",1987,76],["bordeaux",1986,90],["bordeaux",1985,86],["bordeaux",1984,68],["bordeaux",1983,95],["bordeaux",1982,98],["bordeaux",1981,85],["bordeaux",1980,79],["bordeaux",1979,87],["bordeaux",1978,87],["bordeaux",1976,77],["bordeaux",1975,78],["bordeaux",1971,83],["bordeaux",1970,85],
+  ["burgundy",2023,95],["burgundy",2022,95],["burgundy",2021,91],["burgundy",2020,95],["burgundy",2019,96],["burgundy",2018,94],["burgundy",2017,92],["burgundy",2016,92],["burgundy",2015,96],["burgundy",2014,91],["burgundy",2013,89],["burgundy",2012,91],["burgundy",2011,90],["burgundy",2010,94],["burgundy",2009,95],["burgundy",2008,89],["burgundy",2007,90],["burgundy",2006,82],["burgundy",2005,96],["burgundy",2004,79],["burgundy",2003,87],["burgundy",2002,92],["burgundy",2001,88],["burgundy",2000,86],["burgundy",1999,93],["burgundy",1998,86],["burgundy",1997,89],["burgundy",1996,87],["burgundy",1995,89],["burgundy",1994,88],["burgundy",1993,86],["burgundy",1992,75],["burgundy",1991,74],["burgundy",1990,98],["burgundy",1989,90],["burgundy",1988,98],["burgundy",1987,70],["burgundy",1986,94],["burgundy",1985,90],["burgundy",1984,70],["burgundy",1983,88],["burgundy",1982,80],["burgundy",1981,74],["burgundy",1980,78],["burgundy",1979,77],["burgundy",1978,86],["burgundy",1976,88],["burgundy",1975,50],["burgundy",1971,87],["burgundy",1970,82],
+  ["chablis",2023,95],["chablis",2022,96],["chablis",2021,91],["chablis",2020,97],["chablis",2019,93],["chablis",2018,91],["chablis",2017,97],["chablis",2016,87],["chablis",2015,94],["chablis",2014,97],["chablis",2013,90],["chablis",2012,92],["chablis",2011,91],["chablis",2010,94],["chablis",2009,91],["chablis",2008,94],["chablis",2007,91],["chablis",2006,90],["chablis",2005,88],["chablis",2004,91],["chablis",2003,84],["chablis",2002,92],["chablis",2001,86],["chablis",2000,88],["chablis",1999,89],["chablis",1998,84],["chablis",1997,89],["chablis",1996,92],["chablis",1995,93],["chablis",1994,77],["chablis",1993,72],["chablis",1992,90],["chablis",1991,70],["chablis",1990,87],["chablis",1989,90],["chablis",1988,82],["chablis",1987,79],["chablis",1986,82],["chablis",1985,89],["chablis",1984,80],
+  ["champagne",2023,96],["champagne",2022,96],["champagne",2021,86],["champagne",2020,94],["champagne",2019,95],["champagne",2018,92],["champagne",2017,87],["champagne",2016,94],["champagne",2015,93],["champagne",2014,94],["champagne",2013,95],["champagne",2012,96],["champagne",2011,87],["champagne",2010,89],["champagne",2009,92],["champagne",2008,99],["champagne",2007,80],["champagne",2006,86],["champagne",2005,88],["champagne",2004,90],["champagne",2003,88],["champagne",2002,95],["champagne",2001,88],["champagne",2000,92],["champagne",1999,92],["champagne",1998,84],["champagne",1997,93],["champagne",1996,97],["champagne",1995,95],["champagne",1994,79],["champagne",1993,88],["champagne",1992,77],
+  ["mosel",2023,96],["mosel",2022,87],["mosel",2021,90],["mosel",2020,85],["mosel",2019,91],["mosel",2018,90],["mosel",2017,93],["mosel",2016,95],["mosel",2015,78],["mosel",2014,80],["mosel",2013,95],["mosel",2012,89],["mosel",2011,95],["mosel",2010,82],["mosel",2009,92],["mosel",2008,95],["mosel",2007,94],["mosel",2006,92],["mosel",2005,91],["mosel",2004,91],["mosel",2003,91],["mosel",2002,91],["mosel",2001,76],["mosel",2000,86],
+  ["napa",2023,92],["napa",2022,88],["napa",2021,95],["napa",2020,90],["napa",2019,96],["napa",2018,95],["napa",2017,86],["napa",2016,98],["napa",2015,97],["napa",2014,93],["napa",2013,98],["napa",2012,96],["napa",2011,82],["napa",2010,95],["napa",2009,94],["napa",2008,94],["napa",2007,96],["napa",2006,91],["napa",2005,95],["napa",2004,91],["napa",2003,92],["napa",2002,95],["napa",2001,96],["napa",2000,78],
+  ["north-coast-white",2023,92],["north-coast-white",2022,93],["north-coast-white",2021,95],["north-coast-white",2020,89],["north-coast-white",2019,95],["north-coast-white",2018,94],["north-coast-white",2017,94],["north-coast-white",2016,94],["north-coast-white",2015,96],["north-coast-white",2014,94],["north-coast-white",2013,93],["north-coast-white",2012,94],["north-coast-white",2011,88],["north-coast-white",2010,91],["north-coast-white",2009,90],["north-coast-white",2008,88],["north-coast-white",2007,92],["north-coast-white",2006,87],["north-coast-white",2005,94],["north-coast-white",2004,92],["north-coast-white",2003,91],["north-coast-white",2002,90],["north-coast-white",2001,90],["north-coast-white",2000,87],
+  ["pomerol",2023,94],["pomerol",2022,95],["pomerol",2021,87],["pomerol",2020,95],["pomerol",2019,96],["pomerol",2018,94],["pomerol",2017,90],["pomerol",2016,97],["pomerol",2015,95],["pomerol",2014,94],["pomerol",2013,84],["pomerol",2012,94],["pomerol",2011,88],["pomerol",2010,95],["pomerol",2009,98],["pomerol",2008,96],["pomerol",2007,86],["pomerol",2006,90],["pomerol",2005,95],["pomerol",2004,88],["pomerol",2003,84],["pomerol",2002,85],["pomerol",2001,90],["pomerol",2000,95],["pomerol",1999,88],["pomerol",1998,90],["pomerol",1997,87],["pomerol",1996,89],["pomerol",1995,92],["pomerol",1994,89],["pomerol",1993,87],["pomerol",1992,82],["pomerol",1991,58],["pomerol",1990,96],["pomerol",1989,96],["pomerol",1988,89],["pomerol",1987,85],["pomerol",1986,87],["pomerol",1985,88],["pomerol",1984,65],["pomerol",1983,90],["pomerol",1982,96],["pomerol",1981,86],["pomerol",1980,79],["pomerol",1979,86],["pomerol",1978,84],["pomerol",1976,82],["pomerol",1975,94],
+  ["rheingau",2023,96],["rheingau",2022,90],["rheingau",2021,90],["rheingau",2020,90],["rheingau",2019,93],["rheingau",2018,92],["rheingau",2017,90],["rheingau",2016,92],["rheingau",2015,81],["rheingau",2014,83],["rheingau",2013,90],["rheingau",2012,94],["rheingau",2011,87],["rheingau",2010,93],["rheingau",2009,88],["rheingau",2008,92],["rheingau",2007,86],["rheingau",2006,92],["rheingau",2005,93],["rheingau",2004,89],["rheingau",2003,92],["rheingau",2002,95],["rheingau",2001,69],["rheingau",2000,87],
+  ["rhone-north",2023,96],["rhone-north",2022,83],["rhone-north",2021,93],["rhone-north",2020,96],["rhone-north",2019,96],["rhone-north",2018,95],["rhone-north",2017,92],["rhone-north",2016,97],["rhone-north",2015,87],["rhone-north",2014,89],["rhone-north",2013,91],["rhone-north",2012,92],["rhone-north",2011,97],["rhone-north",2010,98],["rhone-north",2009,79],["rhone-north",2008,89],["rhone-north",2007,92],["rhone-north",2006,89],["rhone-north",2005,85],["rhone-north",2004,96],["rhone-north",2003,78],["rhone-north",2002,89],["rhone-north",2001,87],["rhone-north",2000,95],
+  ["sancerre",2023,95],["sancerre",2022,96],["sancerre",2021,91],["sancerre",2020,96],["sancerre",2019,95],["sancerre",2018,94],["sancerre",2017,93],["sancerre",2016,92],["sancerre",2015,91],["sancerre",2014,80],["sancerre",2013,83],["sancerre",2012,86],["sancerre",2011,92],["sancerre",2010,88],["sancerre",2009,90],["sancerre",2008,84],["sancerre",2007,83],["sancerre",2006,94],["sancerre",2005,82],["sancerre",2004,82],["sancerre",2003,96],["sancerre",2002,82],["sancerre",2001,84],["sancerre",2000,84],
+  ["south-rhone",2023,96],["south-rhone",2022,84],["south-rhone",2021,94],["south-rhone",2020,96],["south-rhone",2019,92],["south-rhone",2018,94],["south-rhone",2017,98],["south-rhone",2016,93],["south-rhone",2015,87],["south-rhone",2014,88],["south-rhone",2013,92],["south-rhone",2012,88],["south-rhone",2011,98],["south-rhone",2010,93],["south-rhone",2009,86],["south-rhone",2008,98],["south-rhone",2007,92],["south-rhone",2006,95],["south-rhone",2005,88],["south-rhone",2004,90],["south-rhone",2003,58],["south-rhone",2002,96],["south-rhone",2001,92],["south-rhone",2000,90],
+  ["willamette",2023,93],["willamette",2022,92],["willamette",2021,94],["willamette",2020,85],["willamette",2019,93],["willamette",2018,96],["willamette",2017,90],["willamette",2016,94],["willamette",2015,93],["willamette",2014,92],["willamette",2013,87],["willamette",2012,92],["willamette",2011,90],["willamette",2010,88],["willamette",2009,86],["willamette",2008,94],["willamette",2007,84],["willamette",2006,91],["willamette",2005,85],["willamette",2004,86],["willamette",2003,88],["willamette",2002,92],["willamette",2001,85],["willamette",2000,86],
+  ["yakima",2023,93],["yakima",2022,95],["yakima",2021,96],["yakima",2020,88],["yakima",2019,93],["yakima",2018,94],["yakima",2017,93],["yakima",2016,90],["yakima",2015,86],["yakima",2014,94],["yakima",2013,92],["yakima",2012,95],["yakima",2011,87],["yakima",2010,92],["yakima",2009,92],["yakima",2008,91],["yakima",2007,95],["yakima",2006,91],["yakima",2005,94],["yakima",2004,91],["yakima",2003,90],["yakima",2002,89],["yakima",2001,92],["yakima",2000,89],["yakima",1999,90],["yakima",1998,89],["yakima",1997,90],["yakima",1996,87],["yakima",1995,92],["yakima",1994,88],["yakima",1993,90],["yakima",1992,87],["yakima",1991,85],["yakima",1990,87],["yakima",1989,92],["yakima",1988,88],["yakima",1987,90],["yakima",1986,78],["yakima",1985,80],["yakima",1984,82],
+]
+
+// Region coordinates + varieties (matches regions.js)
+const REGIONS = {
+  "bordeaux":{name:"Bordeaux: St-Julien/Pauillac (L. Bank)",lat:45.20,lng:-0.75,varieties:["Cabernet Sauvignon","Merlot"]},
+  "burgundy":{name:"Burgundy: Côte de Beaune (red)",lat:47.05,lng:4.85,varieties:["Pinot Noir"]},
+  "napa":{name:"Napa Valley (N. Coast Red)",lat:38.50,lng:-122.27,varieties:["Cabernet Sauvignon"],country:"USA"},
+  "barolo":{name:"Barolo",lat:44.61,lng:7.93,varieties:["Nebbiolo"]},
+  "mosel":{name:"Mosel (Middle)",lat:50.00,lng:7.10,varieties:["Riesling"]},
+  "rhone-north":{name:"N. Rhône: Côte Rôtie/Hermitage",lat:45.18,lng:4.83,varieties:["Syrah/Shiraz"]},
+  "south-rhone":{name:"S. Rhône: Châteauneuf-du-Pape",lat:44.06,lng:4.83,varieties:["Grenache","Syrah/Shiraz"]},
+  // --- marginal / cool-climate sub-regions (higher vintage variance) ---
+  "pomerol":{name:"Pomerol (R. Bank)",lat:44.93,lng:-0.20,varieties:["Merlot"]},
+  "chablis":{name:"Chablis (→ Parker Burgundy white)",lat:47.82,lng:3.80,varieties:["Chardonnay"]},
+  "champagne":{name:"Champagne (marginal)",lat:49.05,lng:3.96,varieties:["Chardonnay","Pinot Noir"]},
+  "sancerre":{name:"Sancerre (Loire)",lat:47.33,lng:2.84,varieties:["Sauvignon Blanc"]},
+  "saar":{name:"Saar (cool Mosel)",lat:49.62,lng:6.55,varieties:["Riesling"]},
+  "sonoma-coast":{name:"Sonoma Coast (cool)",lat:38.48,lng:-123.00,varieties:["Pinot Noir","Chardonnay"],country:"USA"},
+  "willamette":{name:"Willamette Valley",lat:45.20,lng:-123.10,varieties:["Pinot Noir"],country:"USA"},
+  // --- Washington (continental — winters drive real vintage variance) ---
+  "yakima":{name:"Yakima Valley WA",lat:46.30,lng:-120.05,varieties:["Cabernet Sauvignon","Syrah/Shiraz","Merlot"],country:"USA"},
+  "horse-heaven":{name:"Horse Heaven Hills WA",lat:45.93,lng:-119.75,varieties:["Cabernet Sauvignon","Merlot","Syrah/Shiraz"],country:"USA"},
+  // White counterpart for the Parker red/white split (cooler Carneros/Sonoma fruit)
+  "north-coast-white":{name:"N. Coast Chardonnay (White)",lat:38.25,lng:-122.35,varieties:["Chardonnay"],country:"USA"},
+  // German cells Parker breaks out separately (distinct targets, more variance)
+  "rheingau":{name:"Rheingau Riesling (Rhein-Main-Neckar white)",lat:50.00,lng:7.95,varieties:["Riesling"]},
+  "baden-pinot":{name:"Baden Spätburgunder (Ger. Pinot Noir)",lat:48.08,lng:7.66,varieties:["Pinot Noir"]}
+};
+
+const VARIETIES = {
+  "Cabernet Sauvignon":{heat:"High",drought:"High",gdd:[2500,3500]},
+  "Merlot":{heat:"Medium",drought:"Medium",gdd:[2200,3200]},
+  "Pinot Noir":{heat:"Low",drought:"Low",gdd:[1500,2200]},
+  "Chardonnay":{heat:"Medium",drought:"Medium",gdd:[1400,2400]},
+  "Nebbiolo":{heat:"Medium",drought:"Medium",gdd:[1800,2400]},
+  "Riesling":{heat:"Low",drought:"Medium",gdd:[1100,1800]},
+  "Sauvignon Blanc":{heat:"Low",drought:"Low",gdd:[1200,1900]},
+  "Grenache":{heat:"High",drought:"High",gdd:[2400,3400]},
+  "Syrah/Shiraz":{heat:"High",drought:"High",gdd:[2200,3200]}
+};
+
+// ============================================================
+// MANUAL WILDFIRE SMOKE FLAGS (historical — pre-2022 air-quality
+// archive isn't reachable client-side, so flag known major smoke
+// vintages by hand). severity: "light" | "moderate" | "severe".
+// Reds are penalised more than whites. Edit to match your records.
+// These are well-documented US West Coast smoke years.
+// ============================================================
+const SMOKE_EVENTS = {
+  "napa|2017":"moderate",  // Oct 2017 North Bay fires
+  "napa|2018":"moderate",  // Camp/Mendocino smoke
+  "napa|2020":"severe",    // 2020 — widespread taint, many declassified
+  "napa|2021":"light",     // limited impact
+  "sonoma-coast|2017":"moderate","sonoma-coast|2018":"light","sonoma-coast|2020":"severe",
+  "willamette|2017":"light","willamette|2020":"severe",
+  "yakima|2020":"moderate","horse-heaven|2020":"moderate"  // 2020 PNW smoke — provisional, verify per-AVA
+};
+const RED_REGIONS = new Set([
+  "napa","bordeaux","burgundy","barolo","rhone-north","south-rhone",
+  "pomerol","sonoma-coast","willamette","yakima","horse-heaven","baden-pinot"  // Merlot / Pinot / Cab = red
+]); // (chablis, champagne, sancerre, saar are white-dominant)
+
+function smokePenalty(regionId, year){
+  const sev = SMOKE_EVENTS[regionId+"|"+year];
+  if(!sev) return 0;
+  const red = RED_REGIONS.has(regionId);
+  if(sev==="severe")   return red ? -18 : -9;
+  if(sev==="moderate") return red ? -8  : -4;
+  return red ? -3 : -1; // light
+}
+
+// ============================================================
+// TUNABLE WEIGHTS (defaults mirror weather.js)
+// ============================================================
+const DEFAULT_WEIGHTS = {
+  heatHotSens:-15, heatHotTol:-6, heatWarmSens:-4, heatWarmTol:3, heatIdeal:2,
+  heatCool:-2, heatColdSens:-6, heatColdOther:-13,
+  rainExcess:-13, rainWet:-5, rainDryTol:2, rainDryOther:-2, rainVdryTol:-3, rainVdryOther:-9,
+  frostPerDay:-8, flowerWet:-8, flowerCold:-5, flowerClean:3,
+  veraisonSpikeTol:-3, veraisonSpikeSens:-8, harvestDilute:-10, harvestDry:5
+};
+let WEIGHTS = Object.assign({}, DEFAULT_WEIGHTS);
+
+// sliders to expose (label, key, min, max)
+const TUNABLES = [
+  ["Excess heat (sensitive)","heatHotSens",-5,15],
+  ["Excess heat (tolerant)","heatHotTol",-2,10],
+  ["Excess rain","rainExcess",-5,2],
+  ["Drought stress","rainVdryOther",-5,2],
+  ["Frost / day","frostPerDay",-5,1],
+  ["Wet flowering","flowerWet",-5,2],
+  ["Heat spikes (sensitive)","veraisonSpikeSens",-3,2],
+  ["Ripening rain (dilution)","harvestDilute",-3,2],
+  ["Reliably warm bonus","heatIdeal",0,8],
+  ["Clean flowering bonus","flowerClean",0,5]
+];
+
+// ============================================================
+// SCORING (parameterized) — mirrors weather.js scoreRegion + timing
+// ============================================================
+function profile(level){ if(level==="High"||level==="Very High")return"tolerant"; if(level==="Low")return"sensitive"; return"neutral"; }
+function regionHeatProfile(r){ let t=0,s=0; r.varieties.forEach(v=>{const d=VARIETIES[v];if(!d)return;const p=profile(d.heat);if(p==="tolerant")t++;if(p==="sensitive")s++;}); return t>s?"tolerant":(s>t?"sensitive":"neutral"); }
+function regionDroughtProfile(r){ let t=0,s=0; r.varieties.forEach(v=>{const d=VARIETIES[v];if(!d)return;const p=profile(d.drought);if(p==="tolerant")t++;if(p==="sensitive")s++;}); return t>s?"tolerant":(s>t?"sensitive":"neutral"); }
+
+function scoreSeason(m, region, W, collect){
+  const heatProfile=regionHeatProfile(region), droughtProfile=regionDroughtProfile(region);
+  let s=50;
+  const F = collect ? [{label:"baseline (a normal year)", pts:50}] : null;
+  const add=(pts,label)=>{ s+=pts; if(F && pts!==0) F.push({label,pts}); };
+  const g=m.gddRatio, r=m.rainRatio;
+  // HEAT: flip sign — learned coefficient +0.16, so warmth raises quality (was penalizing it)
+  if(g>=0.92&&g<=1.12){ if(g>=1.0) add(W.heatIdeal,`ideal warmth ${g.toFixed(2)}`); }
+  else if(g>1.12&&g<=1.28){ add(Math.abs(heatProfile==="tolerant"?W.heatWarmTol:W.heatWarmSens), `warmer than normal ${(g*100).toFixed(0)}% (quality)`); }
+  else if(g>1.28){ add(Math.abs(heatProfile==="tolerant"?W.heatHotTol:W.heatHotSens), `very hot ${(g*100).toFixed(0)}% (ripe)`); }
+  else if(g>=0.80&&g<0.92){ add(W.heatCool,`cooler than normal ${(g*100).toFixed(0)}%`); }
+  else { add(heatProfile==="sensitive"?W.heatColdSens:W.heatColdOther, `cold ${(g*100).toFixed(0)}%`); }
+  // RAIN: learned near-zero (-0.02 to -0.03), so reduce penalties drastically
+  if(r>=0.70&&r<=1.20){}
+  else if(r>1.20&&r<=1.50){ add(W.rainWet*0.2,`wetter than normal ${(r*100).toFixed(0)}%`); }
+  else if(r>1.50){ add(W.rainExcess*0.2,`excess rain ${(r*100).toFixed(0)}%`); }
+  else if(r>=0.45&&r<0.70){ add((droughtProfile==="tolerant"?W.rainDryTol:W.rainDryOther)*0.3, `dry ${(r*100).toFixed(0)}%`); }
+  else { add((droughtProfile==="tolerant"?W.rainVdryTol:W.rainVdryOther)*0.3, `very dry ${(r*100).toFixed(0)}%`); }
+  // TIMING: keep small (frost -0.06, diurnal +0.06)
+  const st=m.stages;
+  if(st){
+    if(st.budbreak.frostDays>0) add(Math.max(W.frostPerDay*2, W.frostPerDay*st.budbreak.frostDays*0.5), `${st.budbreak.frostDays} frost day(s)`);
+    if(st.flowering.days>0){
+      if(st.flowering.rain>2.0) add(W.flowerWet*0.3,`wet flowering (${st.flowering.rain.toFixed(1)}in)`);
+      else if(st.flowering.coldDays>=5) add(W.flowerCold,`cold flowering (${st.flowering.coldDays}d)`);
+      else add(W.flowerClean,`clean flowering`);
+    }
+    if(st.veraison.days>0 && st.veraison.heatSpikeDays>=5) add((heatProfile==="tolerant"?W.veraisonSpikeTol:W.veraisonSpikeSens)*0.2, `${st.veraison.heatSpikeDays} heat-spike days`);
+    if(st.harvest.days>0){
+      if(st.harvest.rain>4.0) add(W.harvestDilute*0.2,`harvest rain (${st.harvest.rain.toFixed(1)}in)`);
+      else if(st.harvest.rain>0&&st.harvest.rain<1.5) add(W.harvestDry,`dry harvest`);
+    }
+  }
+  const score=Math.max(0,Math.min(100,Math.round(s)));
+  return collect ? {score, factors:F, raw:Math.round(s)} : score;
+}
+
+// ============================================================
+// WEATHER METRICS from archive (full completed season)
+// ============================================================
+const BASE_F=50, FROST_F=30, COLD_FLOWER_F=60, HEAT_SPIKE_F=95;
+const GDD_BUDBREAK_MAX=350, GDD_FLOWER=[350,750], GDD_VERAISON=[1250,1750], GDD_HARVEST_FLOOR=1750;
+
+function seasonMonths(lat){ return lat<0 ? null : [2,3,4,5,6,7,8,9]; } // northern Mar-Oct (seed is northern)
+function targetGDD(region){ const mins=[]; region.varieties.forEach(v=>{const d=VARIETIES[v];if(d)mins.push(d.gdd[0]);}); return mins.length?mins.reduce((a,b)=>a+b,0)/mins.length:2200; }
+
+// Extract one year's season daily arrays from the full archive response
+function yearSlice(daily, year, lat){
+  const out={time:[],tmax:[],tmin:[],precip:[]};
+  for(let i=0;i<daily.time.length;i++){
+    const d=new Date(daily.time[i]+"T00:00");
+    if(d.getFullYear()!==year) continue;
+    const m=d.getMonth();
+    if(lat<0){ /* southern not in seed */ }
+    else if(m>=2&&m<=9){
+      out.time.push(daily.time[i]); out.tmax.push(daily.temperature_2m_max[i]);
+      out.tmin.push(daily.temperature_2m_min[i]); out.precip.push(daily.precipitation_sum[i]);
+    }
+  }
+  return out;
+}
+function seasonGDD(slice){ let s=0; for(let i=0;i<slice.time.length;i++){const tx=slice.tmax[i],tn=slice.tmin[i];if(tx!=null&&tn!=null)s+=Math.max(0,(tx+tn)/2-BASE_F);} return s; }
+function seasonRain(slice){ let s=0; for(const v of slice.precip) if(v!=null)s+=v; return s; }
+
+function stagesGDD(slice, region){
+  const target=targetGDD(region), harvestStart=Math.max(GDD_HARVEST_FLOOR,target-150);
+  const S={budbreak:{frostDays:0,days:0},flowering:{rain:0,coldDays:0,days:0},veraison:{heatSpikeDays:0,days:0},harvest:{rain:0,days:0}};
+  let cum=0;
+  for(let i=0;i<slice.time.length;i++){
+    const tx=slice.tmax[i],tn=slice.tmin[i],pr=slice.precip[i]||0;
+    cum+=(tx!=null&&tn!=null)?Math.max(0,(tx+tn)/2-BASE_F):0;
+    let st=null;
+    if(cum<=GDD_BUDBREAK_MAX)st="budbreak";
+    else if(cum>=GDD_FLOWER[0]&&cum<=GDD_FLOWER[1])st="flowering";
+    else if(cum>=GDD_VERAISON[0]&&cum<=GDD_VERAISON[1])st="veraison";
+    else if(cum>=harvestStart)st="harvest";
+    if(!st)continue;
+    const X=S[st];X.days++;
+    if(st==="budbreak"){ if(tn!=null&&tn<=FROST_F)X.frostDays++; }
+    else if(st==="flowering"){ X.rain+=pr; if(tx!=null&&tx<COLD_FLOWER_F)X.coldDays++; }
+    else if(st==="veraison"){ if(tx!=null&&tx>HEAT_SPIKE_F)X.heatSpikeDays++; }
+    else if(st==="harvest"){ X.rain+=pr; }
+  }
+  return S;
+}
+
+// Build metrics for a (region, year): ratio vs prior-10-yr baseline + stages
+// Rich per-season features for empirical factor discovery (absolute, not ratios)
+function computeFeatures(slice, region){
+  const ideal = targetGDD(region);
+  let gdd=0, rainSeason=0, rainHarvest=0, frostDays=0, heatSpikes=0, diSum=0, diN=0;
+  for(let i=0;i<slice.time.length;i++){
+    const d=new Date(slice.time[i]+"T00:00"), mo=d.getMonth();
+    const tx=slice.tmax[i], tn=slice.tmin[i], pr=slice.precip[i]||0;
+    if(tx!=null&&tn!=null){
+      gdd += Math.max(0,(tx+tn)/2-BASE_F);
+      if(mo>=7&&mo<=8){ diSum += (tx-tn); diN++; }       // Aug–Sep diurnal range
+      if(mo>=6&&mo<=8 && tx>=95) heatSpikes++;            // Jul–Sep heat spikes
+    }
+    if(tn!=null && mo===3 && tn<=32) frostDays++;         // April frost nights
+    rainSeason += pr;
+    if(mo>=7&&mo<=9) rainHarvest += pr;                   // Aug–Oct ripening/harvest rain
+  }
+  return { gdd, gddVsIdeal: gdd-ideal, rainSeason, rainHarvest, frostDays, heatSpikes, diurnal: diN?diSum/diN:0 };
+}
+
+function buildMetrics(daily, region, year, lat){
+  const slice=yearSlice(daily, year, lat);
+  if(slice.time.length<60) return null; // insufficient data
+  const gdd=seasonGDD(slice), rain=seasonRain(slice);
+  const baseG=[],baseR=[];
+  for(let y=year-10;y<year;y++){
+    const ps=yearSlice(daily,y,lat);
+    if(ps.time.length>=60){ baseG.push(seasonGDD(ps)); baseR.push(seasonRain(ps)); }
+  }
+  if(baseG.length<3) return null;
+  const avgG=baseG.reduce((a,b)=>a+b,0)/baseG.length;
+  const avgR=baseR.reduce((a,b)=>a+b,0)/baseR.length || 0.01;
+  return { gddRatio:gdd/avgG, rainRatio:rain/avgR, stages:stagesGDD(slice,region), gdd:Math.round(gdd), baseGDD:Math.round(avgG), features:computeFeatures(slice,region) };
+}
+
+// ============================================================
+// FETCH
+// ============================================================
+async function fetchArchive(region, minYear, maxYear){
+  const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${region.lat}&longitude=${region.lng}`+
+    `&start_date=${minYear}-01-01&end_date=${maxYear}-12-31`+
+    `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum`+
+    `&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`;
+  const res=await fetch(url);
+  if(!res.ok) throw new Error("Open-Meteo "+res.status);
+  return (await res.json()).daily;
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function rankArr(arr){
+  const idx=arr.map((v,i)=>[v,i]).sort((a,b)=>a[0]-b[0]); const ranks=new Array(arr.length); let i=0;
+  while(i<idx.length){ let j=i; while(j+1<idx.length&&idx[j+1][0]===idx[i][0])j++; const a=(i+j)/2+1; for(let k=i;k<=j;k++)ranks[idx[k][1]]=a; i=j+1; }
+  return ranks;
+}
+function pearson(a,b){ const n=a.length; if(n<2)return NaN; const ma=a.reduce((x,y)=>x+y,0)/n,mb=b.reduce((x,y)=>x+y,0)/n; let nu=0,da=0,db=0; for(let i=0;i<n;i++){const x=a[i]-ma,y=b[i]-mb;nu+=x*y;da+=x*x;db+=y*y;} return(da&&db)?nu/Math.sqrt(da*db):NaN; }
+function spearman(a,b){ return pearson(rankArr(a),rankArr(b)); }
+function znorm(arr){ const n=arr.length,m=arr.reduce((a,b)=>a+b,0)/n; const sd=Math.sqrt(arr.reduce((a,b)=>a+(b-m)*(b-m),0)/n)||1; return arr.map(v=>(v-m)/sd); }
+
+// ============================================================
+// RUN
+// ============================================================
+let CACHE = null; // {regionId: {year: metrics}} after fetch
+
+async function runBacktest(){
+  const btn=document.getElementById("run-btn"); btn.disabled=true;
+  const prog=document.getElementById("prog"), fill=document.getElementById("prog-fill"), msg=document.getElementById("prog-msg");
+  prog.classList.remove("hidden"); msg.classList.remove("hidden");
+
+  const regionIds=[...new Set(VINTAGES.map(v=>v[0]))];
+  CACHE={}; const errors=[];
+  for(let i=0;i<regionIds.length;i++){
+    const id=regionIds[i], region=REGIONS[id];
+    const years=VINTAGES.filter(v=>v[0]===id).map(v=>v[1]);
+    const minY=Math.min(...years)-10, maxY=Math.max(...years);
+    msg.textContent=`Fetching ${region.name} (${minY}–${maxY})…`;
+    try{
+      const daily=await fetchArchive(region, minY, maxY);
+      CACHE[id]={};
+      years.forEach(y=>{ const m=buildMetrics(daily, region, y, region.lat); if(m)CACHE[id][y]=m; });
+    }catch(e){ errors.push(id+": "+e.message); }
+    fill.style.width=Math.round((i+1)/regionIds.length*100)+"%";
+  }
+  msg.textContent = errors.length ? `Done with ${errors.length} fetch issue(s): ${errors.join("; ")}` : "Done — scoring & correlating…";
+  computeAndRender();
+  buildTuners();
+  btn.disabled=false;
+}
+
+function computeAndRender(){
+  // Build per-region predicted & actual, compute correlations
+  const regionRows=[]; const pooledP=[], pooledA=[]; const residuals=[];
+  let bestWorstHits=0, bestWorstTotal=0;
+
+  Object.keys(CACHE).forEach(id=>{
+    const region=REGIONS[id];
+    const entries=Object.keys(CACHE[id]).map(Number).sort();
+    if(entries.length<3) return;
+    const pred=[], act=[];
+    entries.forEach(y=>{
+      const m=CACHE[id][y];
+      let p=scoreSeason(m, region, WEIGHTS);
+      p=Math.max(0,Math.min(100,p + smokePenalty(id, y))); // apply manual smoke flag
+      const a=VINTAGES.find(v=>v[0]===id&&v[1]===y)[2];
+      pred.push(p); act.push(a);
+      m._pred=p;
+    });
+    const r=spearman(pred, act);
+    regionRows.push({id, name:region.name, n:entries.length, r});
+    // pooled z-scores
+    const zp=znorm(pred), za=znorm(act);
+    entries.forEach((y,k)=>{ pooledP.push(zp[k]); pooledA.push(za[k]); residuals.push({id,name:region.name,year:y,pred:pred[k],za:za[k],resid:zp[k]-za[k]}); });
+    // best/worst year hit
+    const piBest=pred.indexOf(Math.max(...pred)), aiBest=act.indexOf(Math.max(...act));
+    const piWorst=pred.indexOf(Math.min(...pred)), aiWorst=act.indexOf(Math.min(...act));
+    if(piBest===aiBest)bestWorstHits++; if(piWorst===aiWorst)bestWorstHits++; bestWorstTotal+=2;
+  });
+
+  const pooled=pearson(pooledP, pooledA);
+  document.getElementById("results").classList.remove("hidden");
+  document.getElementById("tuning").classList.remove("hidden");
+  document.getElementById("regression").classList.remove("hidden");
+
+  const sp=document.getElementById("stat-spearman"); sp.textContent=isFinite(pooled)?pooled.toFixed(2):"—";
+  const interp=document.getElementById("interp-spearman");
+  interp.textContent = pooled>=0.6?"strong":pooled>=0.35?"moderate":pooled>=0.15?"weak":"poor";
+  interp.className="interp "+(pooled>=0.6?"corr-good":pooled>=0.35?"corr-mid":"corr-bad");
+  document.getElementById("stat-regions").textContent=regionRows.length;
+  document.getElementById("stat-pairs").textContent=pooledP.length;
+  const hr=bestWorstTotal?Math.round(bestWorstHits/bestWorstTotal*100):0;
+  document.getElementById("stat-hit").textContent=hr+"%";
+  document.getElementById("interp-hit").textContent=`${bestWorstHits}/${bestWorstTotal} extremes`;
+
+  // region table
+  const rtb=document.querySelector("#region-table tbody"); rtb.innerHTML="";
+  regionRows.sort((a,b)=>b.r-a.r).forEach(row=>{
+    const cls=row.r>=0.6?"corr-good":row.r>=0.35?"corr-mid":"corr-bad";
+    const reads=row.r>=0.6?"orders years well":row.r>=0.35?"partial signal":row.r>=0?"little signal":"inverted — check";
+    rtb.innerHTML+=`<tr><td>${row.name}</td><td class="num">${row.n}</td><td class="num ${cls}">${isFinite(row.r)?row.r.toFixed(2):"—"}</td><td>${reads}</td></tr>`;
+  });
+
+  // residual table (largest |resid|)
+  const xtb=document.querySelector("#resid-table tbody"); xtb.innerHTML="";
+  residuals.sort((a,b)=>Math.abs(b.resid)-Math.abs(a.resid)).slice(0,10).forEach(x=>{
+    const cls=x.resid>0?"resid-pos":"resid-neg";
+    xtb.innerHTML+=`<tr><td>${x.name}</td><td class="num">${x.year}</td><td class="num">${x.pred}</td><td class="num">${x.za.toFixed(2)}</td><td class="num ${cls}">${x.resid>0?"+":""}${x.resid.toFixed(2)}</td></tr>`;
+  });
+
+  drawScatter(pooledP, pooledA);
+}
+
+function drawScatter(px, py){
+  const W=560,H=320,pad=42;
+  const xs=px, ys=py;
+  const xmin=Math.min(...xs,-2.2),xmax=Math.max(...xs,2.2),ymin=Math.min(...ys,-2.2),ymax=Math.max(...ys,2.2);
+  const sx=v=>pad+(v-xmin)/(xmax-xmin)*(W-2*pad);
+  const sy=v=>H-pad-(v-ymin)/(ymax-ymin)*(H-2*pad);
+  let pts="";
+  for(let i=0;i<xs.length;i++) pts+=`<circle cx="${sx(xs[i]).toFixed(1)}" cy="${sy(ys[i]).toFixed(1)}" r="4.5" fill="#9B2335" opacity="0.6"/>`;
+  // 45-degree reference line
+  const lo=Math.max(xmin,ymin),hi=Math.min(xmax,ymax);
+  const refLine=`<line x1="${sx(lo)}" y1="${sy(lo)}" x2="${sx(hi)}" y2="${sy(hi)}" stroke="#6E6E82" stroke-dasharray="4 4" stroke-width="1"/>`;
+  document.getElementById("scatter").innerHTML=
+    `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;background:#FAF7F2;border-radius:8px">
+      <line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#3A3A4A" stroke-width="1"/>
+      <line x1="${pad}" y1="${pad}" x2="${pad}" y2="${H-pad}" stroke="#3A3A4A" stroke-width="1"/>
+      ${refLine}${pts}
+      <text x="${W/2}" y="${H-8}" text-anchor="middle" font-size="11" fill="#6E6E82" font-family="Inter">Predicted index (z-score, per region)</text>
+      <text x="14" y="${H/2}" text-anchor="middle" font-size="11" fill="#6E6E82" font-family="Inter" transform="rotate(-90 14 ${H/2})">Actual quality (z-score)</text>
+    </svg>`;
+}
+
+// ============================================================
+// TUNING
+// ============================================================
+function buildTuners(){
+  const grid=document.getElementById("tune-grid"); grid.innerHTML="";
+  TUNABLES.forEach(([label,key,min,max])=>{
+    const id="tune-"+key;
+    grid.innerHTML+=`<div class="tune"><label>${label}</label><input type="range" id="${id}" min="${min}" max="${max}" step="1" value="${WEIGHTS[key]}"/><span class="tv" id="${id}-v">${WEIGHTS[key]}</span></div>`;
+  });
+  TUNABLES.forEach(([label,key])=>{
+    const inp=document.getElementById("tune-"+key);
+    inp.addEventListener("input",()=>{ WEIGHTS[key]=parseInt(inp.value,10); document.getElementById("tune-"+key+"-v").textContent=WEIGHTS[key]; computeAndRender(); });
+  });
+}
+document.getElementById("reset-weights").addEventListener("click",()=>{ WEIGHTS=Object.assign({},DEFAULT_WEIGHTS); buildTuners(); computeAndRender(); document.getElementById("weights-out").classList.add("hidden"); });
+document.getElementById("export-weights").addEventListener("click",()=>{
+  const out=document.getElementById("weights-out"); out.classList.remove("hidden");
+  out.textContent="// Tuned weights — paste the relevant values into scoreRegion()/timingFactors() in weather.js\n"+JSON.stringify(WEIGHTS,null,2);
+});
+
+// init counts
+document.getElementById("pair-count").textContent=VINTAGES.length;
+document.getElementById("region-count").textContent=new Set(VINTAGES.map(v=>v[0])).size;
+document.getElementById("run-btn").addEventListener("click",runBacktest);
+</script>
+</body>
+</html>
